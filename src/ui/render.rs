@@ -252,6 +252,16 @@ pub const AUDIT_COLS: &[Col] = &[
     Col("FINDING", &["finding"]),
 ];
 
+/// What a snapshot collects.
+pub const RESOURCE_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("SURFACE", &["surface"]),
+    Col("PATH", &["path"]),
+    Col("ABOUT", &["about"]),
+];
+
+pub const SNAPSHOT_COLS: &[Col] = &[Col("SNAPSHOT", &["snapshot"]), Col("KB", &["kb"])];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),

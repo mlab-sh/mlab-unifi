@@ -112,6 +112,13 @@ impl Spinner {
         Self { state, handle }
     }
 
+    /// Change what the line says, for work that moves through named steps.
+    pub fn set(&self, message: impl Into<String>) {
+        if let Ok(mut m) = self.state.message.lock() {
+            *m = message.into();
+        }
+    }
+
     /// Stop drawing and wipe the line, leaving nothing behind.
     pub fn clear(mut self) {
         self.shutdown();

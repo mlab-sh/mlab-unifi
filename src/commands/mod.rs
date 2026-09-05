@@ -22,4 +22,5 @@ pub mod prompt;
 pub mod settings;
 pub mod shadow;
 pub mod sites;
+pub mod snapshot;
 pub mod wifi;

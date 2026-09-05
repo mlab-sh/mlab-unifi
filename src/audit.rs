@@ -18,6 +18,7 @@ use std::collections::{HashMap, HashSet};
 use serde_json::Value;
 
 use crate::enrich::firmware;
+use crate::unifi::secrets::SECRET_FIELDS;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Severity {
@@ -111,25 +112,6 @@ pub fn skipped(i: &Input) -> Vec<&'static str> {
 }
 
 // ---- credentials ------------------------------------------------------------
-
-/// Field names holding an actual secret. An explicit list, because `key` is the
-/// name every settings section carries and a substring rule flags all of them.
-const SECRET_FIELDS: [&str; 14] = [
-    "x_ssh_password",
-    "x_ssh_sha512passwd",
-    "x_passphrase",
-    "x_api_token",
-    "x_mgmt_key",
-    "x_private_key",
-    "x_mesh_psk",
-    "x_element_psk",
-    "x_pregenerated_dh_key",
-    "x_iapp_key",
-    "x_authkey",
-    "x_inform_authkey",
-    "syslog_key",
-    "x_vwirekey",
-];
 
 fn credentials(i: &Input) -> Vec<Finding> {
     let mut out = Vec::new();

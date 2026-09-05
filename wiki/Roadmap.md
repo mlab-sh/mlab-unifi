@@ -61,20 +61,13 @@ reports what each channel actually does. See [Live](Live).
 the rules kept apart from the collection so each one is testable. See
 [Audit](Audit).
 
+**The dated snapshot.** `snapshot` collects every catalogued resource into one
+file, secrets removed on write and unreadable resources recorded as such. See
+[Snapshot](Snapshot).
+
 ## Next
 
-**1. A dated snapshot.** One command that pulls the useful routes into a single
-dated file, with secrets dropped at write time rather than at display time. It
-is the base of everything after it: without a photograph there is nothing to
-compare.
-
-The design point that has to land here, not later: a resource registry, one
-table mapping a name to its route, its surface and its secret policy. Commands
-and the snapshot both consume it, so adding a resource is a line rather than a
-file. And an unavailable route is recorded as unavailable, never as absent
-data, because a check that could not run must not report success.
-
-**2. The diff.** Compare two snapshots and qualify the differences: a new
+**1. The diff.** Compare two snapshots and qualify the differences: a new
 client, a changed rule, an opened port, a firmware change, a neighbouring BSSID
 that appeared. This is where passive detection becomes real.
 

@@ -142,6 +142,9 @@ pub enum Cmd {
     /// Every graded check in one report (local only)
     Audit(commands::audit::AuditArgs),
 
+    /// One dated, secret-free record of everything the console holds (local only)
+    Snapshot(commands::snapshot::SnapshotArgs),
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -212,6 +215,7 @@ pub async fn run() -> Result<()> {
         Cmd::Blast(a) => commands::blast::run(&c, &ctx, &a).await,
         Cmd::Live(a) => commands::live::run(&c, &ctx, &a).await,
         Cmd::Audit(a) => commands::audit::run(&c, &ctx, &a).await,
+        Cmd::Snapshot(a) => commands::snapshot::run(&c, &ctx, &a).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }

@@ -2,6 +2,8 @@
 
 pub mod client;
 pub mod config;
+pub mod registry;
+pub mod secrets;
 pub mod site;
 
 pub use client::{esc, Client, Surface};
