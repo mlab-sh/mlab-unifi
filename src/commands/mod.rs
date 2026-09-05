@@ -7,6 +7,7 @@
 pub mod api;
 pub mod clients;
 pub mod devices;
+pub mod footprint;
 pub mod hosts;
 pub mod info;
 pub mod login;

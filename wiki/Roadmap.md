@@ -46,6 +46,10 @@ See [Shadow](Shadow).
 keeping "off" apart from "reads as protection without being one". See
 [Posture](Posture).
 
+**External footprint.** `footprint` reports the uplink and the console's own
+reachability, and enriches the public address on request. See
+[Footprint](Footprint).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single

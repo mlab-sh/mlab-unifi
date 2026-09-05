@@ -30,8 +30,7 @@ tested so far.
 | Secret hygiene  (shipped) | what the API key exposes, pre-shared key entropy, SSH accounts | `rest/setting`, `rest/wlanconf`, `stat/device` | direct |
 | Defensive posture  (shipped) | IPS with no active category, TLS inspection off, geo filtering off | `rest/setting` | direct |
 | Logging coverage  (shipped) | NetFlow disabled, local syslog only, rules without logging | `rest/setting`, `rest/portforward` | direct |
-| Configuration drift | any change between two dated snapshots | full snapshot, diffed | derived |
-| External footprint | ASN, operator and public prefix, the start of a passive OSINT trail | `stat/health` | direct |
+| External footprint (shipped) | ASN, operator and public prefix, the start of a passive OSINT trail | `stat/health` | direct |
 | Blast radius | what a compromised client reaches, following the graph and the zones | `v2 topology` joined to firewall policies | derived |
 | Real-time detection | associations, state changes, Protect events as they happen | WebSocket streams | partial |
 | Protect privacy | cameras with the microphone live, face and plate recognition armed | Protect integration API | direct |

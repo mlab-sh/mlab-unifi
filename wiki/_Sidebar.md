@@ -14,6 +14,7 @@
 - [wifi](Wifi)
 - [shadow](Shadow)
 - [posture](Posture)
+- [footprint](Footprint)
 - [hosts](Hosts)
 - [api](Api)
 - [profile](Configuration)

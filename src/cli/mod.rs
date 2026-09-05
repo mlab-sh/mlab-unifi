@@ -130,6 +130,9 @@ pub enum Cmd {
     /// What the site's settings say it is defending, and with what (local only)
     Posture,
 
+    /// What this site looks like from the outside (local only)
+    Footprint(commands::footprint::FootprintArgs),
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -196,6 +199,7 @@ pub async fn run() -> Result<()> {
         Cmd::Wifi { cmd } => commands::wifi::run(&c, &ctx, cmd).await,
         Cmd::Shadow(a) => commands::shadow::run(&c, &ctx, &a).await,
         Cmd::Posture => commands::posture::run(&c, &ctx).await,
+        Cmd::Footprint(a) => commands::footprint::run(&c, &ctx, &a).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }
