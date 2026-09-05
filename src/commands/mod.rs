@@ -12,6 +12,7 @@ pub mod info;
 pub mod login;
 pub mod network;
 pub mod ping;
+pub mod posture;
 pub mod profile;
 pub mod prompt;
 pub mod settings;

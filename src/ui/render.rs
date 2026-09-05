@@ -229,6 +229,14 @@ pub const ADOPTION_COLS: &[Col] = &[
     Col("MAC", &["macAddress"]),
 ];
 
+/// Posture checks: one row per thing looked at.
+pub const POSTURE_CHECK_COLS: &[Col] = &[
+    Col("AREA", &["area"]),
+    Col("CHECK", &["check"]),
+    Col("STATE", &["state"]),
+    Col("DETAIL", &["detail"]),
+];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),
@@ -546,7 +554,8 @@ fn tint(s: &str) -> colored::ColoredString {
         // clients must not read as a wall of errors.
         "false" => s.dimmed(),
         "PENDING" | "UPDATING" | "ADOPTING" | "UNKNOWN" => s.yellow(),
-        "current" | "supported" => s.green(),
+        "current" | "supported" | "ok" => s.green(),
+        "weak" => s.yellow(),
         "unsupported" | "end of life" | "below minimum" => s.red(),
         "update available" => s.yellow(),
         "lts branch" | "unknown" => s.dimmed(),

@@ -13,6 +13,7 @@
 - [network](Network)
 - [wifi](Wifi)
 - [shadow](Shadow)
+- [posture](Posture)
 - [hosts](Hosts)
 - [api](Api)
 - [profile](Configuration)

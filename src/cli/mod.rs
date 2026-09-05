@@ -127,6 +127,9 @@ pub enum Cmd {
     /// What turned up on the network that nobody announced (local only)
     Shadow(commands::shadow::ShadowArgs),
 
+    /// What the site's settings say it is defending, and with what (local only)
+    Posture,
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -192,6 +195,7 @@ pub async fn run() -> Result<()> {
         Cmd::Network { cmd } => commands::network::run(&c, &ctx, cmd).await,
         Cmd::Wifi { cmd } => commands::wifi::run(&c, &ctx, cmd).await,
         Cmd::Shadow(a) => commands::shadow::run(&c, &ctx, &a).await,
+        Cmd::Posture => commands::posture::run(&c, &ctx).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }

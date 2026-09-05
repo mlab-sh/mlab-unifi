@@ -27,10 +27,9 @@ tested so far.
 | Evil twin  (shipped) | a foreign BSSID broadcasting your SSID, or a known SSID in the clear | `stat/rogueap` joined to `rest/wlanconf` | derived |
 | Rogue access point  (shipped) | an unmanaged AP on an internal channel at strong signal | `stat/rogueap` | derived |
 | Shadow IT (shipped) | equipment that appeared since the last review | `rest/user`, `first_seen` | derived |
-| Client anomalies | anomaly counters, reassociations, degraded channel quality | `v2 clients/active` | direct |
-| Secret hygiene | what the API key exposes, pre-shared key entropy, SSH accounts | `rest/setting`, `rest/wlanconf`, `stat/device` | direct |
-| Defensive posture | IPS with no active category, TLS inspection off, geo filtering off | `rest/setting` | direct |
-| Logging coverage | NetFlow disabled, local syslog only, rules without logging | `rest/setting`, `rest/portforward` | direct |
+| Secret hygiene  (shipped) | what the API key exposes, pre-shared key entropy, SSH accounts | `rest/setting`, `rest/wlanconf`, `stat/device` | direct |
+| Defensive posture  (shipped) | IPS with no active category, TLS inspection off, geo filtering off | `rest/setting` | direct |
+| Logging coverage  (shipped) | NetFlow disabled, local syslog only, rules without logging | `rest/setting`, `rest/portforward` | direct |
 | Configuration drift | any change between two dated snapshots | full snapshot, diffed | derived |
 | External footprint | ASN, operator and public prefix, the start of a passive OSINT trail | `stat/health` | direct |
 | Blast radius | what a compromised client reaches, following the graph and the zones | `v2 topology` joined to firewall policies | derived |

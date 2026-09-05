@@ -42,6 +42,10 @@ channel limit that bounds it. See [Wifi](Wifi).
 addresses from genuine ones and flagging wired arrivals and adopted hardware.
 See [Shadow](Shadow).
 
+**Security posture.** `posture` turns the 38 settings sections into checks,
+keeping "off" apart from "reads as protection without being one". See
+[Posture](Posture).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single
