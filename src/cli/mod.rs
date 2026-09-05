@@ -112,6 +112,12 @@ pub enum Cmd {
         cmd: commands::clients::ClientCmd,
     },
 
+    /// Networks, segmentation and inbound exposure (local only)
+    Network {
+        #[command(subcommand)]
+        cmd: commands::network::NetworkCmd,
+    },
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -174,6 +180,7 @@ pub async fn run() -> Result<()> {
         Cmd::Sites(a) => commands::sites::run(&c, &a).await,
         Cmd::Devices { cmd } => commands::devices::run(&c, &ctx, cmd).await,
         Cmd::Clients { cmd } => commands::clients::run(&c, &ctx, cmd).await,
+        Cmd::Network { cmd } => commands::network::run(&c, &ctx, cmd).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }

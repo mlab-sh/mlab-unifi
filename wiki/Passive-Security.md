@@ -19,8 +19,8 @@ tested so far.
 | Fingerprint identity | operating system, vendor, family and model, without querying the machine | `rest/user` joined to `fingerprint_devices` | derived |
 | CVE correlation | published advisories naming a model on the site | `stat/device` joined to vuln.mlab.sh | partial, see below |
 | End of life | hardware past support, not adoptable, unsupported | `stat/device` | direct |
-| Inbound exposure | ports reachable from the internet, UPnP, forwards with no logging | `rest/portforward`, `rest/networkconf` | direct |
-| Segmentation audit | VLANs without isolation, mDNS crossing boundaries, routable guests | `rest/networkconf`, firewall zones | direct |
+| Inbound exposure (shipped) | ports reachable from the internet, UPnP, forwards with no logging | `rest/portforward`, `rest/networkconf` | direct |
+| Segmentation audit (shipped) | VLANs without isolation, mDNS crossing boundaries, routable guests | `rest/networkconf`, firewall zones | direct |
 | Rule hygiene | permissive, disabled, unlogged or dead firewall rules | `v2 firewall-policies` | derived |
 | Wi-Fi hardening | WPA2 only, transition mode, optional PMF, weak pre-shared key | `rest/wlanconf` | direct |
 | RF reconnaissance | the full 802.11 neighbourhood: encryption, channel, power, vendor | `stat/rogueap` | direct |

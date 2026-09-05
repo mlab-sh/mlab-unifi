@@ -10,6 +10,7 @@ pub mod devices;
 pub mod hosts;
 pub mod info;
 pub mod login;
+pub mod network;
 pub mod ping;
 pub mod profile;
 pub mod prompt;

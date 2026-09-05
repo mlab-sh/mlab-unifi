@@ -124,6 +124,35 @@ pub const LIVE_IDENTITY_COLS: &[Col] = &[
     Col("TYPE", &["type"]),
 ];
 
+/// Networks, read as a segmentation map.
+pub const NETWORK_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("VLAN", &["vlanId"]),
+    Col("SUBNET", &["subnet"]),
+    Col("ZONE", &["zone"]),
+    Col("ISOLATION", &["isolation"]),
+    Col("INTERNET", &["internet"]),
+    Col("MDNS", &["mdns"]),
+    Col("UPNP", &["upnp"]),
+];
+
+/// Port forwards, read as the way in.
+pub const FORWARD_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("PROTO", &["proto"]),
+    Col("WAN PORT", &["wanPort"]),
+    Col("TO", &["target"]),
+    Col("ENABLED", &["enabled"]),
+    Col("LOG", &["log"]),
+    Col("SOURCE", &["source"]),
+];
+
+pub const ZONE_COLS: &[Col] = &[
+    Col("ZONE", &["name"]),
+    Col("ORIGIN", &["origin"]),
+    Col("NETWORKS", &["networks"]),
+];
+
 pub const HOST_COLS: &[Col] = &[
     Col("NAME", &["reportedState.hostname", "reportedState.name"]),
     Col("TYPE", &["type"]),

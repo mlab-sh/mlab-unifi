@@ -10,6 +10,7 @@
 - [sites](Sites)
 - [devices](Devices)
 - [clients](Clients)
+- [network](Network)
 - [hosts](Hosts)
 - [api](Api)
 - [profile](Configuration)
