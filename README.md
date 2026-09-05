@@ -17,9 +17,46 @@ Requires UniFi Network 9.x or later on the console.
 
 ## Install
 
+**Homebrew** (macOS and Linux)
+
 ```bash
-cargo build --release   # ./target/release/mlab-unifi
+brew tap mlab-sh/mlab-unifi https://github.com/mlab-sh/mlab-unifi.git
+brew install mlab-unifi
 ```
+
+**Debian and Ubuntu**: download the `.deb` for your architecture from the
+[releases page](https://github.com/mlab-sh/mlab-unifi/releases), then:
+
+```bash
+sudo apt install ./mlab-unifi_1.0.0_amd64.deb
+```
+
+**Fedora, RHEL and rebuilds**: the same with the `.rpm`:
+
+```bash
+sudo dnf install ./mlab-unifi-1.0.0-1.x86_64.rpm
+```
+
+**Prebuilt binary** (macOS and Linux, x86_64 and arm64): a tarball from the same
+page. The Linux builds are linked against glibc 2.35, so Debian 12 and Ubuntu
+22.04 and newer.
+
+Every release carries a `SHA256SUMS` file covering all of its assets:
+
+```bash
+sha256sum -c --ignore-missing SHA256SUMS
+```
+
+**From source** (a recent Rust toolchain):
+
+```bash
+git clone https://github.com/mlab-sh/mlab-unifi.git
+cd mlab-unifi && cargo build --release
+```
+
+See [Install](https://github.com/mlab-sh/mlab-unifi/wiki/Install) for the
+details, and [Releasing](https://github.com/mlab-sh/mlab-unifi/wiki/Releasing)
+for how these packages are built.
 
 ## First run
 
@@ -95,15 +132,16 @@ on the next sync.
 
 ```
 src/
-  main.rs        entry point
-  cli/           the clap surface, and the context a command runs in
-  commands/      one file per command
-  unifi/         the HTTP client, the surfaces, profiles, the resource registry
-  enrich/        what turns raw records into named things: fingerprints, OUI,
-                 firmware posture, advisories
-  audit.rs       the graded checks, as pure functions over fetched data
-  ui/            the terminal render and the progress rules
-wiki/            the documentation, mirrored to the GitHub wiki
+  main.rs          entry point
+  cli/             the clap surface, and the context a command runs in
+  commands/        one file per command
+  unifi/           the HTTP client, the surfaces, profiles, the registry
+  enrich/          fingerprints, OUI, firmware posture, advisories
+  audit.rs         the graded checks, as pure functions over fetched data
+  ui/              the terminal render and the progress rules
+wiki/              the documentation, mirrored to the GitHub wiki
+Formula/           the Homebrew formula, regenerated at every release
+.github/workflows/ the wiki sync and the release pipeline
 ```
 
 Prior art for the API surface:

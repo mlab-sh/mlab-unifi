@@ -1,9 +1,51 @@
 [package]
 name = "mlab-unifi"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
 description = "CLI to talk to UniFi consoles (local Network Integration API) and the UniFi Site Manager cloud API"
 license = "MIT"
+repository = "https://github.com/mlab-sh/mlab-unifi"
+homepage = "https://github.com/mlab-sh/mlab-unifi"
+readme = "README.md"
+keywords = ["unifi", "ubiquiti", "network", "security", "cli"]
+categories = ["command-line-utilities", "network-programming"]
+
+# Debian packaging. The .deb ships on the GitHub release, nowhere else. The
+# release profile already strips the binary, so CI passes --no-strip: letting
+# cargo-deb strip it again would run the host strip against the aarch64 binary
+# and fail the cross build.
+# cargo-deb rewrites `target/release` to `target/<triple>/release` when it is
+# given --target, so one asset list covers both architectures.
+[package.metadata.deb]
+maintainer = "mlab <hello@mlab.sh>"
+section = "net"
+priority = "optional"
+extended-description = """\
+mlab-unifi reads a UniFi console over its key-authenticated APIs and turns what \
+it finds into graded security checks: segmentation, inbound exposure, wireless \
+hardening, unmanaged devices, and what changed since the last snapshot. It only \
+reads, and nothing leaves the machine unless a command says it does."""
+depends = "$auto"
+assets = [
+    ["target/release/mlab-unifi", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/mlab-unifi/README.md", "644"],
+    ["LICENSE", "usr/share/doc/mlab-unifi/copyright", "644"],
+]
+
+# RPM packaging, for dnf/yum. Unlike cargo-deb, the source paths here are taken
+# literally, so CI stages the cross-built binary at pkg/mlab-unifi first rather
+# than relying on a target rewrite that would silently package the wrong
+# architecture. auto-req is off for the same reason: deriving requirements
+# means running the host's find-requires against a foreign binary.
+[package.metadata.generate-rpm]
+summary = "CLI over the UniFi APIs, for passive network security work"
+license = "MIT"
+auto-req = "disabled"
+assets = [
+    { source = "pkg/mlab-unifi", dest = "/usr/bin/mlab-unifi", mode = "755" },
+    { source = "README.md", dest = "/usr/share/doc/mlab-unifi/README.md", mode = "644", doc = true },
+    { source = "LICENSE", dest = "/usr/share/licenses/mlab-unifi/LICENSE", mode = "644", doc = true },
+]
 
 [[bin]]
 name = "mlab-unifi"

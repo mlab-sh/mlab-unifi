@@ -55,16 +55,21 @@ you ask for explicitly, and no data leaves your machine.
   text. What that means for how you store the key and what the tool writes to
   disk.
 - **[Roadmap](Roadmap)** - what is built, what is next, in order.
+- **[Releasing](Releasing)** - how a version becomes a Homebrew formula, a
+  `.deb` and an `.rpm`.
 
 ## Getting started
 
 ```bash
-cargo build --release
-./target/release/mlab-unifi login --name lab --host 192.168.1.1
-./target/release/mlab-unifi ping
+brew tap mlab-sh/mlab-unifi https://github.com/mlab-sh/mlab-unifi.git
+brew install mlab-unifi
+mlab-unifi login --name lab --host 192.168.1.1
+mlab-unifi ping
 ```
 
-See [Install](Install) for the rest.
+There are `.deb` and `.rpm` packages and tarballs for every target on the
+[releases page](https://github.com/mlab-sh/mlab-unifi/releases) too. See
+[Install](Install).
 
 ## Scope and stability
 

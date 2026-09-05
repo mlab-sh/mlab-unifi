@@ -1,17 +1,63 @@
 # Install
 
-mlab-unifi is a single Rust binary with no runtime dependencies.
+mlab-unifi is a single Rust binary with no runtime dependencies. macOS and
+Linux, x86_64 and arm64, from a package manager or as a tarball.
+
+## Homebrew (macOS and Linux)
 
 ```bash
-git clone <this repo>
-cd mlab-unifi
-cargo build --release
+brew tap mlab-sh/mlab-unifi https://github.com/mlab-sh/mlab-unifi.git
+brew install mlab-unifi
 ```
 
-The binary lands at `target/release/mlab-unifi`. Copy it anywhere on your
-`PATH`:
+## Debian and Ubuntu
+
+Download the `.deb` for your architecture from the
+[releases page](https://github.com/mlab-sh/mlab-unifi/releases), then let apt
+resolve it:
 
 ```bash
+sudo apt install ./mlab-unifi_1.0.0_amd64.deb
+```
+
+## Fedora, RHEL and rebuilds
+
+The same with the `.rpm`:
+
+```bash
+sudo dnf install ./mlab-unifi-1.0.0-1.x86_64.rpm
+```
+
+The payload is gzip rather than the zstd default, so rpm 4.14 (RHEL 8 and its
+rebuilds) reads it too.
+
+## Prebuilt binary
+
+Tarballs for every target are on the same page:
+
+```bash
+tar -xzf mlab-unifi-1.0.0-aarch64-apple-darwin.tar.gz
+install -m 0755 mlab-unifi-1.0.0-aarch64-apple-darwin/mlab-unifi ~/.local/bin/
+```
+
+The Linux builds are linked against glibc 2.35, so they run on Debian 12,
+Ubuntu 22.04 and anything newer.
+
+## Checking what you downloaded
+
+Nothing is signed, so every release carries a `SHA256SUMS` file covering all of
+its assets:
+
+```bash
+sha256sum -c --ignore-missing SHA256SUMS
+```
+
+## From source
+
+```bash
+git clone https://github.com/mlab-sh/mlab-unifi.git
+cd mlab-unifi
+cargo build --release
 install -m 0755 target/release/mlab-unifi ~/.local/bin/
 ```
 
@@ -19,7 +65,7 @@ install -m 0755 target/release/mlab-unifi ~/.local/bin/
 
 | | |
 | --- | --- |
-| Rust | 1.80 or later (2021 edition) |
+| Rust | 1.80 or later (2021 edition), only to build from source |
 | Console | UniFi Network 9.x or later, on UniFi OS 9.3.43 or later |
 | Access | An API key, created in the console UI |
 
