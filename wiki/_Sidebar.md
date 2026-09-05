@@ -11,6 +11,7 @@
 - [devices](Devices)
 - [clients](Clients)
 - [network](Network)
+- [wifi](Wifi)
 - [hosts](Hosts)
 - [api](Api)
 - [profile](Configuration)

@@ -34,6 +34,10 @@ port forwards with their logging and source restrictions. See
 and over-broad rules across the three origin classes, and states plainly that
 ordering is not analysed. See [Network](Network).
 
+**The radio side.** `wifi` covers SSID hardening, the audible neighbourhood,
+impostor and bridged access points, and airtime occupancy, each stating the
+channel limit that bounds it. See [Wifi](Wifi).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single

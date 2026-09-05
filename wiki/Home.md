@@ -23,6 +23,7 @@ you ask for explicitly, and no data leaves your machine.
 | [`devices`](Devices) | List, inspect and act on the managed hardware of a site. |
 | [`clients`](Clients) | What is connected now, or with `--all` every client ever seen. |
 | [`network`](Network) | Segmentation, firewall zones, and what can reach the site from outside. |
+| [`wifi`](Wifi) | Wireless hardening, the neighbourhood, impostors, and airtime. |
 | [`hosts`](Hosts) | Consoles visible on a Site Manager account (cloud only). |
 | [`api`](Api) | Raw request against any [surface](Surfaces), for everything not wrapped yet. |
 | [`profile`](Configuration) | List, show, select and delete saved profiles. |

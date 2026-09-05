@@ -118,6 +118,12 @@ pub enum Cmd {
         cmd: commands::network::NetworkCmd,
     },
 
+    /// Wireless hardening, neighbourhood, impostors and airtime (local only)
+    Wifi {
+        #[command(subcommand)]
+        cmd: Option<commands::wifi::WifiCmd>,
+    },
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -181,6 +187,7 @@ pub async fn run() -> Result<()> {
         Cmd::Devices { cmd } => commands::devices::run(&c, &ctx, cmd).await,
         Cmd::Clients { cmd } => commands::clients::run(&c, &ctx, cmd).await,
         Cmd::Network { cmd } => commands::network::run(&c, &ctx, cmd).await,
+        Cmd::Wifi { cmd } => commands::wifi::run(&c, &ctx, cmd).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }

@@ -22,10 +22,10 @@ tested so far.
 | Inbound exposure (shipped) | ports reachable from the internet, UPnP, forwards with no logging | `rest/portforward`, `rest/networkconf` | direct |
 | Segmentation audit (shipped) | VLANs without isolation, mDNS crossing boundaries, routable guests | `rest/networkconf`, firewall zones | direct |
 | Rule hygiene (shipped) | unlogged, duplicate, dead and over-broad rules | `firewall/policies` | derived, ordering excluded |
-| Wi-Fi hardening | WPA2 only, transition mode, optional PMF, weak pre-shared key | `rest/wlanconf` | direct |
-| RF reconnaissance | the full 802.11 neighbourhood: encryption, channel, power, vendor | `stat/rogueap` | direct |
-| Evil twin | a foreign BSSID broadcasting your SSID, or a known SSID in the clear | `stat/rogueap` joined to `rest/wlanconf` | derived |
-| Rogue access point | an unmanaged AP on an internal channel at strong signal | `stat/rogueap` | derived |
+| Wi-Fi hardening  (shipped) | WPA2 only, transition mode, optional PMF, weak pre-shared key | `rest/wlanconf` | direct |
+| RF reconnaissance  (shipped) | the full 802.11 neighbourhood: encryption, channel, power, vendor | `stat/rogueap` | direct |
+| Evil twin  (shipped) | a foreign BSSID broadcasting your SSID, or a known SSID in the clear | `stat/rogueap` joined to `rest/wlanconf` | derived |
+| Rogue access point  (shipped) | an unmanaged AP on an internal channel at strong signal | `stat/rogueap` | derived |
 | Shadow IT | equipment that appeared since the last review | `rest/user`, `first_seen` | derived |
 | Client anomalies | anomaly counters, reassociations, degraded channel quality | `v2 clients/active` | direct |
 | Secret hygiene | what the API key exposes, pre-shared key entropy, SSH accounts | `rest/setting`, `rest/wlanconf`, `stat/device` | direct |

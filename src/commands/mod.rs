@@ -16,3 +16,4 @@ pub mod profile;
 pub mod prompt;
 pub mod settings;
 pub mod sites;
+pub mod wifi;

@@ -158,6 +158,56 @@ pub const POLICY_COLS: &[Col] = &[
     Col("ORIGIN", &["origin"]),
 ];
 
+/// SSID posture. `PSK` carries the shape of the key, never the key.
+pub const WLAN_COLS: &[Col] = &[
+    Col("SSID", &["name"]),
+    Col("SECURITY", &["security"]),
+    Col("WPA3", &["wpa3"]),
+    Col("PMF", &["pmf"]),
+    Col("PSK", &["psk"]),
+    Col("ISOLATION", &["isolation"]),
+    Col("GUEST", &["guest"]),
+    Col("ON", &["enabled"]),
+];
+
+/// Access points in range, closest first.
+pub const NEIGHBOUR_COLS: &[Col] = &[
+    Col("SSID", &["essid"]),
+    Col("BSSID", &["bssid"]),
+    Col("GHZ", &["band"]),
+    Col("CH", &["channel"]),
+    Col("WIDTH", &["width"]),
+    Col("SECURITY", &["security"]),
+    Col("DBM", &["signal"]),
+    Col("VENDOR", &["vendor"]),
+    Col("SEEN", &["seenSecondsAgo"]),
+];
+
+/// Wired clients that can bridge a network, found by fingerprint rather than
+/// by radio.
+pub const BRIDGE_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("MAC", &["macAddress"]),
+    Col("FAMILY", &["family"]),
+    Col("DEVICE", &["device"]),
+    Col("CONF", &["confidence"]),
+    Col("IP", &["lastIp"]),
+];
+
+/// Radio occupancy. `OTHERS` is the interference figure.
+pub const AIRTIME_COLS: &[Col] = &[
+    Col("DEVICE", &["device"]),
+    Col("GHZ", &["radio"]),
+    Col("CH", &["channel"]),
+    Col("WIDTH", &["width"]),
+    Col("CLIENTS", &["clients"]),
+    Col("BUSY%", &["busyPct"]),
+    Col("SELF%", &["selfPct"]),
+    Col("OTHERS%", &["othersPct"]),
+    Col("RETRIES%", &["retriesPct"]),
+    Col("DBM", &["txPower"]),
+];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),
