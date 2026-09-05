@@ -1,0 +1,25 @@
+[package]
+name = "mlab-unifi"
+version = "0.1.0"
+edition = "2021"
+description = "CLI to talk to UniFi consoles (local Network Integration API) and the UniFi Site Manager cloud API"
+license = "MIT"
+
+[[bin]]
+name = "mlab-unifi"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive", "wrap_help"] }
+colored = "3"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls-native-roots"] }
+rpassword = "7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[profile.release]
+strip = true
+opt-level = "z"
+lto = true
