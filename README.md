@@ -1,5 +1,7 @@
 # mlab-unifi
 
+![](./.github/banner.png)
+
 A small Rust CLI over the two key-authenticated UniFi APIs:
 
 | mode    | base URL                                          | paging                | TLS                     |
