@@ -65,10 +65,10 @@ Three event channels accept the same API key and upgrade over HTTP/1.1:
 /proxy/protect/integration/v1/subscribe/events
 ```
 
-All three return `101 Switching Protocols` and stay open. The message format is
-not yet documented here: during observation windows on a quiet network no frame
-arrived, so nothing is claimed about the payload. Consuming them is on the
-[Roadmap](Roadmap).
+All three return `101 Switching Protocols`. The two Protect channels then stay
+open; the network one closes immediately with code 1000, which means an API key
+is not what it wants. No frame has been observed on any of them. See
+[`live`](Live).
 
 ## Reaching a surface by hand
 

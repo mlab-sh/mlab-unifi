@@ -11,6 +11,7 @@ pub mod devices;
 pub mod footprint;
 pub mod hosts;
 pub mod info;
+pub mod live;
 pub mod login;
 pub mod network;
 pub mod ping;

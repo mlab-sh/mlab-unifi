@@ -32,7 +32,7 @@ tested so far.
 | Logging coverage  (shipped) | NetFlow disabled, local syslog only, rules without logging | `rest/setting`, `rest/portforward` | direct |
 | External footprint (shipped) | ASN, operator and public prefix, the start of a passive OSINT trail | `stat/health` | direct |
 | Blast radius (shipped) | what a compromised client reaches, following the graph and the zones | `v2 topology` joined to firewall policies | derived |
-| Real-time detection | associations, state changes, Protect events as they happen | WebSocket streams | partial |
+| Real-time detection (partly shipped) | associations, state changes, Protect events as they happen | WebSocket streams | partial |
 
 ## The enrichment chain
 
@@ -87,9 +87,10 @@ Verified by probing, not assumed. On Network 10.5:
 | `protect/api/*` (legacy) | 401. Detailed Protect events need a cookie session. |
 | `access/integration/v1` | 401. Refused to a console key. |
 
-The three WebSocket channels accept the key and stay open, but no frame arrived
-during the observation windows on a quiet network, so nothing is claimed about
-their payload.
+The two Protect channels accept the key and stay open, silent on a quiet site.
+The network channel accepts the upgrade and then closes immediately with code
+1000, so it is not usable with an API key. No frame has been observed on any of
+them, so nothing is claimed about their payload. See [Live](Live).
 
 ## The consequence for design
 

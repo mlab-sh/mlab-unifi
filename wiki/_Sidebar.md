@@ -16,6 +16,7 @@
 - [posture](Posture)
 - [footprint](Footprint)
 - [blast](Blast)
+- [live](Live)
 - [hosts](Hosts)
 - [api](Api)
 - [profile](Configuration)

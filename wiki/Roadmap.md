@@ -54,6 +54,9 @@ reachability, and enriches the public address on request. See
 matrix that is sound because per-pair ordering is unambiguous. See
 [Blast](Blast).
 
+**The live streams.** `live` attaches to the event channels, records frames and
+reports what each channel actually does. See [Live](Live).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single
@@ -76,9 +79,6 @@ forward without logging, optional PMF, an IPS with no active category, a VLAN
 without isolation, a short pre-shared key. Output graded by severity, with a
 third state next to pass and fail: **not evaluable**, for when the route was
 unavailable.
-
-**4. The real-time collector.** Hold the three WebSocket channels open and log
-what arrives, first to document the message format, then to detect on it.
 
 ## Also wanted
 
