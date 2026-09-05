@@ -12,6 +12,7 @@
 - [clients](Clients)
 - [network](Network)
 - [wifi](Wifi)
+- [shadow](Shadow)
 - [hosts](Hosts)
 - [api](Api)
 - [profile](Configuration)

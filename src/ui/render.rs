@@ -208,6 +208,27 @@ pub const AIRTIME_COLS: &[Col] = &[
     Col("DBM", &["txPower"]),
 ];
 
+/// Arrivals: what the console met for the first time inside the window.
+pub const SHADOW_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("APPEARED", &["firstSeen"]),
+    Col("LAST SEEN", &["lastSeen"]),
+    Col("LINK", &["link"]),
+    Col("NETWORK", &["network"]),
+    Col("VENDOR", &["vendor"]),
+    Col("DEVICE", &["device"]),
+    Col("MAC", &["macAddress"]),
+];
+
+/// UniFi hardware that joined the managed network in the same window.
+pub const ADOPTION_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("MODEL", &["model"]),
+    Col("ADOPTED", &["adoptedAt"]),
+    Col("IP", &["ipAddress"]),
+    Col("MAC", &["macAddress"]),
+];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),

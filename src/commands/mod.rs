@@ -15,5 +15,6 @@ pub mod ping;
 pub mod profile;
 pub mod prompt;
 pub mod settings;
+pub mod shadow;
 pub mod sites;
 pub mod wifi;

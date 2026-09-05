@@ -124,6 +124,9 @@ pub enum Cmd {
         cmd: Option<commands::wifi::WifiCmd>,
     },
 
+    /// What turned up on the network that nobody announced (local only)
+    Shadow(commands::shadow::ShadowArgs),
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -188,6 +191,7 @@ pub async fn run() -> Result<()> {
         Cmd::Clients { cmd } => commands::clients::run(&c, &ctx, cmd).await,
         Cmd::Network { cmd } => commands::network::run(&c, &ctx, cmd).await,
         Cmd::Wifi { cmd } => commands::wifi::run(&c, &ctx, cmd).await,
+        Cmd::Shadow(a) => commands::shadow::run(&c, &ctx, &a).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }

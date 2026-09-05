@@ -38,6 +38,10 @@ ordering is not analysed. See [Network](Network).
 impostor and bridged access points, and airtime occupancy, each stating the
 channel limit that bounds it. See [Wifi](Wifi).
 
+**Shadow IT.** `shadow` reports arrivals from `first_seen`, separating rotated
+addresses from genuine ones and flagging wired arrivals and adopted hardware.
+See [Shadow](Shadow).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single

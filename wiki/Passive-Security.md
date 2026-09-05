@@ -26,7 +26,7 @@ tested so far.
 | RF reconnaissance  (shipped) | the full 802.11 neighbourhood: encryption, channel, power, vendor | `stat/rogueap` | direct |
 | Evil twin  (shipped) | a foreign BSSID broadcasting your SSID, or a known SSID in the clear | `stat/rogueap` joined to `rest/wlanconf` | derived |
 | Rogue access point  (shipped) | an unmanaged AP on an internal channel at strong signal | `stat/rogueap` | derived |
-| Shadow IT | equipment that appeared since the last review | `rest/user`, `first_seen` | derived |
+| Shadow IT (shipped) | equipment that appeared since the last review | `rest/user`, `first_seen` | derived |
 | Client anomalies | anomaly counters, reassociations, degraded channel quality | `v2 clients/active` | direct |
 | Secret hygiene | what the API key exposes, pre-shared key entropy, SSH accounts | `rest/setting`, `rest/wlanconf`, `stat/device` | direct |
 | Defensive posture | IPS with no active category, TLS inspection off, geo filtering off | `rest/setting` | direct |
