@@ -5,6 +5,7 @@
 //! its own arguments for the ones that only touch the config file.
 
 pub mod api;
+pub mod audit;
 pub mod blast;
 pub mod clients;
 pub mod devices;

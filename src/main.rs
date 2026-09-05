@@ -7,10 +7,12 @@
 //! | ---------- | ----------------------------------------------------------- |
 //! | `unifi`    | the APIs: HTTP handler, profiles, site resolution            |
 //! | `enrich`   | turning what the console observed into an identity           |
+//! | `audit`    | the graded checks, as pure functions over fetched data       |
 //! | `ui`       | everything the user sees: progress on stderr, rendering      |
 //! | `cli`      | the clap surface and the dispatch                            |
 //! | `commands` | one module per command                                       |
 
+mod audit;
 mod cli;
 mod commands;
 mod enrich;

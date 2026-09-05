@@ -57,6 +57,10 @@ matrix that is sound because per-pair ordering is unambiguous. See
 **The live streams.** `live` attaches to the event channels, records frames and
 reports what each channel actually does. See [Live](Live).
 
+**One graded report.** `audit` runs every check in one pass and grades it, with
+the rules kept apart from the collection so each one is testable. See
+[Audit](Audit).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single
@@ -73,12 +77,6 @@ data, because a check that could not run must not report success.
 **2. The diff.** Compare two snapshots and qualify the differences: a new
 client, a changed rule, an opened port, a firmware change, a neighbouring BSSID
 that appeared. This is where passive detection becomes real.
-
-**3. The posture audit.** Deterministic checks over one snapshot: a port
-forward without logging, optional PMF, an IPS with no active category, a VLAN
-without isolation, a short pre-shared key. Output graded by severity, with a
-third state next to pass and fail: **not evaluable**, for when the route was
-unavailable.
 
 ## Also wanted
 

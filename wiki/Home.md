@@ -16,6 +16,7 @@ you ask for explicitly, and no data leaves your machine.
 
 | Command | What it does |
 | --- | --- |
+| [`audit`](Audit) | Every graded check in one report. Start here. |
 | [`login`](Login) | Create or update a profile, prove the credentials work, save them. |
 | [`ping`](Ping) | Check that the current profile reaches its API, and report what is on the other end. |
 | [`info`](Info) | The console's own version information. |

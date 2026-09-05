@@ -139,6 +139,9 @@ pub enum Cmd {
     /// Attach to the console event stream and print what arrives (local only)
     Live(commands::live::LiveArgs),
 
+    /// Every graded check in one report (local only)
+    Audit(commands::audit::AuditArgs),
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -208,6 +211,7 @@ pub async fn run() -> Result<()> {
         Cmd::Footprint(a) => commands::footprint::run(&c, &ctx, &a).await,
         Cmd::Blast(a) => commands::blast::run(&c, &ctx, &a).await,
         Cmd::Live(a) => commands::live::run(&c, &ctx, &a).await,
+        Cmd::Audit(a) => commands::audit::run(&c, &ctx, &a).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }

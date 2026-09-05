@@ -245,6 +245,13 @@ pub const BLAST_COLS: &[Col] = &[
     Col("NETWORKS", &["networks"]),
 ];
 
+/// Audit findings, worst first.
+pub const AUDIT_COLS: &[Col] = &[
+    Col("SEVERITY", &["severity"]),
+    Col("AREA", &["area"]),
+    Col("FINDING", &["finding"]),
+];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),
@@ -563,7 +570,10 @@ fn tint(s: &str) -> colored::ColoredString {
         "false" => s.dimmed(),
         "PENDING" | "UPDATING" | "ADOPTING" | "UNKNOWN" => s.yellow(),
         "current" | "supported" | "ok" => s.green(),
-        "weak" => s.yellow(),
+        "weak" | "medium" => s.yellow(),
+        "critical" => s.red().bold(),
+        "high" => s.red(),
+        "low" => s.dimmed(),
         "unsupported" | "end of life" | "below minimum" => s.red(),
         "update available" => s.yellow(),
         "lts branch" | "unknown" => s.dimmed(),

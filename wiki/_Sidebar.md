@@ -4,6 +4,7 @@
 - [Install](Install)
 
 **Commands**
+- [audit](Audit)
 - [login](Login)
 - [ping](Ping)
 - [info](Info)
