@@ -89,10 +89,20 @@ pub async fn run(c: &Client, ctx: &Ctx, a: &SnapshotArgs) -> Result<()> {
     }
     spinner.clear();
 
+    // The address is how we reached the console today, not what it is. Two
+    // snapshots taken either side of a DHCP change must still be comparable, so
+    // carry the identity the console gives itself.
+    let console_id = resources
+        .get("sysinfo")
+        .and_then(|r| r.pointer("/items/0/anonymous_controller_id"))
+        .cloned()
+        .unwrap_or(Value::Null);
+
     let snapshot = json!({
         "version": 1,
         "takenAt": unifi::iso8601(now()),
         "console": {
+            "id": console_id,
             "host": ctx.profile.host,
             "site": site_id,
             "legacySite": legacy,

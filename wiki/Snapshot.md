@@ -85,7 +85,12 @@ why the file is not world readable.
 {
   "version": 1,
   "takenAt": "2026-09-05T13:31:24Z",
-  "console": { "host": "...", "site": "...", "legacySite": "default" },
+  "console": {
+    "id": "0c62493e-...",     // stable: the identity the console gives itself
+    "host": "192.168.10.1",   // how we reached it today, nothing more
+    "site": "88f7af54-...",
+    "legacySite": "default"
+  },
   "collection": {
     "resources": 18, "collected": 18,
     "unavailable": [], "secretsRedacted": 20
@@ -98,6 +103,11 @@ why the file is not world readable.
 
 `version` is there so a later reader can refuse a shape it does not understand
 rather than misread it.
+
+`console.id` is the identity the console reports for itself, carried separately
+from `host`. An address is how we reached it today; two snapshots taken either
+side of a DHCP change must still be recognisable as the same console, and
+whatever compares them has to be able to refuse two snapshots that are not.
 
 ## Cost
 
