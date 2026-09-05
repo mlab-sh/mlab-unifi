@@ -24,11 +24,7 @@ pub async fn run(c: &Client, ctx: &Ctx) -> Result<()> {
                 .to_string()
         }
         Mode::Cloud => {
-            ui::spin(
-                "Reaching api.ui.com",
-                c.list("/v1/hosts", &[], false, 0, Some(1)),
-            )
-            .await?;
+            ui::spin("Reaching api.ui.com", c.list("/v1/hosts", &[], 0, Some(1))).await?;
             String::new()
         }
     };

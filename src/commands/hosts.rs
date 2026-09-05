@@ -10,11 +10,7 @@ pub async fn run(c: &Client, a: &ListArgs) -> Result<()> {
     if c.mode() != Mode::Cloud {
         bail!("`hosts` is a cloud command; use --mode cloud or a cloud profile");
     }
-    let rows = ui::spin(
-        "Listing hosts",
-        c.list("/v1/hosts", &[], a.all, a.offset, a.limit),
-    )
-    .await?;
+    let rows = ui::spin("Listing hosts", c.list("/v1/hosts", &[], a.offset, a.limit)).await?;
 
     render::heading("Hosts");
     render::list(&rows, render::HOST_COLS);

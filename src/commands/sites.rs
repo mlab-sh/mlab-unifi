@@ -11,7 +11,7 @@ pub async fn run(c: &Client, a: &ListArgs) -> Result<()> {
         Mode::Local => "/sites",
         Mode::Cloud => "/v1/sites",
     };
-    let rows = ui::spin("Listing sites", c.list(path, &[], a.all, a.offset, a.limit)).await?;
+    let rows = ui::spin("Listing sites", c.list(path, &[], a.offset, a.limit)).await?;
 
     render::heading("Sites");
     render::list(&rows, render::SITE_COLS);

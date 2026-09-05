@@ -10,7 +10,7 @@ use serde_json::Value;
 
 use crate::cli::Ctx;
 use crate::ui::{self, render};
-use crate::unifi::{esc, site, Client};
+use crate::unifi::{esc, site, Client, Surface};
 
 #[derive(Args, Debug)]
 pub struct ApiArgs {
@@ -18,6 +18,9 @@ pub struct ApiArgs {
     pub method: String,
     /// Path relative to the API base, e.g. /sites or /v1/hosts
     pub path: String,
+    /// Which surface of the console to send it to
+    #[arg(long, default_value = "integration", value_parser = ["integration", "legacy", "v2"])]
+    pub surface: String,
     /// JSON body: inline, @file, or - for stdin
     #[arg(long, short = 'd', value_name = "JSON")]
     pub data: Option<String>,
@@ -27,10 +30,7 @@ pub struct ApiArgs {
     /// Treat the response as a paginated list and return the items
     #[arg(long)]
     pub list: bool,
-    /// With --list, follow pagination to the end
-    #[arg(long)]
-    pub all: bool,
-    /// With --list, page size
+    /// With --list, return a single page of this size instead of everything
     #[arg(long, value_name = "N")]
     pub limit: Option<u32>,
 }
@@ -39,13 +39,25 @@ pub async fn run(c: &Client, ctx: &Ctx, a: ApiArgs) -> Result<()> {
     let method = Method::from_bytes(a.method.to_ascii_uppercase().as_bytes())
         .with_context(|| format!("{:?} is not an HTTP method", a.method))?;
 
+    let surface = match a.surface.as_str() {
+        "legacy" => Surface::Legacy,
+        "v2" => Surface::V2,
+        _ => Surface::Integration,
+    };
+
     let mut path = a.path.clone();
     if !path.starts_with('/') {
         path.insert(0, '/');
     }
     if path.contains("{site}") {
-        let site = site::resolve(c, &ctx.profile.site).await?;
-        path = path.replace("{site}", &esc(&site));
+        // The two worlds name a site differently: a UUID on the documented
+        // surface, a short name on the internal ones.
+        let id = site::resolve(c, &ctx.profile.site).await?;
+        let named = match surface {
+            Surface::Integration => id,
+            _ => site::resolve_legacy(c, &id).await?,
+        };
+        path = path.replace("{site}", &esc(&named));
     }
 
     let mut query = Vec::new();
@@ -67,14 +79,29 @@ pub async fn run(c: &Client, ctx: &Ctx, a: ApiArgs) -> Result<()> {
         if body.is_some() {
             bail!("--list cannot be combined with --data");
         }
-        let rows = ui::spin(&label, c.list(&path, &query, a.all, 0, a.limit)).await?;
+        let rows = match surface {
+            Surface::Integration => ui::spin(&label, c.list(&path, &query, 0, a.limit)).await?,
+            _ => {
+                // The internal surfaces answer in one shot, so --limit has to be
+                // applied here rather than silently doing nothing.
+                let mut rows = ui::spin(&label, c.list_on(surface, &path, &query)).await?;
+                if let Some(n) = a.limit {
+                    rows.truncate(n as usize);
+                }
+                rows
+            }
+        };
         render::heading(&label);
         render::list_auto(&rows);
         render::count(rows.len(), "item");
         return Ok(());
     }
 
-    let v = ui::spin(&label, c.request(method, &path, &query, body.as_ref())).await?;
+    let v = ui::spin(
+        &label,
+        c.request_on(surface, method, &path, &query, body.as_ref()),
+    )
+    .await?;
     render::one(&v);
     Ok(())
 }

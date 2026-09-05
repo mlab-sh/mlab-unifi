@@ -48,7 +48,8 @@ UNIFI_API_KEY=... mlab-unifi login --name lab --host 192.168.1.1 --non-interacti
 mlab-unifi ping                       # is the profile alive
 mlab-unifi info                       # console version (local)
 mlab-unifi sites
-mlab-unifi devices list --all
+mlab-unifi devices list
+mlab-unifi clients list --all          # every client ever seen, with an active flag
 mlab-unifi devices get <id>
 mlab-unifi devices restart <id>
 mlab-unifi devices power-cycle <id> --port 4
@@ -60,11 +61,12 @@ Anything not wrapped yet goes through the raw handler. `{site}` is replaced by
 the resolved site id, and `--list` unwraps whichever paging envelope applies:
 
 ```bash
-mlab-unifi api GET '/sites/{site}/devices' --list --all
-mlab-unifi api GET '/sites/{site}/firewall-policies' --list
+mlab-unifi api GET '/sites/{site}/devices' --list
+mlab-unifi api GET '/s/{site}/stat/rogueap' --surface legacy --list
+mlab-unifi api GET '/sites/{site}/firewall/policies' --list
 mlab-unifi api POST '/sites/{site}/clients/<id>/actions' -d '{"action":"AUTHORIZE_GUEST_ACCESS"}'
 mlab-unifi api POST '/sites/{site}/hotspot/vouchers' -d @voucher.json
-mlab-unifi -p cloud api GET /v1/devices --list --all
+mlab-unifi -p cloud api GET /v1/devices --list
 ```
 
 ## Configuration

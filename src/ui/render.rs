@@ -73,6 +73,17 @@ pub const CLIENT_COLS: &[Col] = &[
     Col("ID", &["id"]),
 ];
 
+/// The asset inventory: every known client, connected or not.
+pub const INVENTORY_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("ACTIVE", &["activeNow"]),
+    Col("IP", &["ipAddress"]),
+    Col("MAC", &["macAddress"]),
+    Col("TYPE", &["type"]),
+    Col("FIRST SEEN", &["firstSeen"]),
+    Col("LAST SEEN", &["lastSeen"]),
+];
+
 pub const HOST_COLS: &[Col] = &[
     Col("NAME", &["reportedState.hostname", "reportedState.name"]),
     Col("TYPE", &["type"]),
@@ -365,7 +376,10 @@ fn rank(key: &str) -> u8 {
 fn tint(s: &str) -> colored::ColoredString {
     match s {
         "ONLINE" | "UP" | "CONNECTED" | "true" => s.green(),
-        "OFFLINE" | "DOWN" | "false" | "DISCONNECTED" => s.red(),
+        "OFFLINE" | "DOWN" | "DISCONNECTED" => s.red(),
+        // `false` is an absence, not a fault — an inventory of disconnected
+        // clients must not read as a wall of errors.
+        "false" => s.dimmed(),
         "PENDING" | "UPDATING" | "ADOPTING" | "UNKNOWN" => s.yellow(),
         "" => s.normal(),
         _ => s.normal(),

@@ -114,26 +114,30 @@ pub enum Cmd {
 
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
-        after_help = "PATH is relative to the API base and may contain {site},\n\
-                      which is replaced by the resolved site id.\n\n\
+        after_help = "PATH is relative to the chosen surface and may contain {site},\n\
+                      replaced by whichever site identifier that surface expects.\n\n\
+                      Surfaces: integration (documented), legacy and v2 (internal,\n\
+                      far richer, undocumented and liable to change).\n\n\
                       Examples:\n  \
                       mlab-unifi api GET /sites\n  \
-                      mlab-unifi api GET '/sites/{site}/devices' --list --all\n  \
+                      mlab-unifi api GET '/sites/{site}/devices' --list\n  \
+                      mlab-unifi api GET '/s/{site}/stat/rogueap' --surface legacy --list\n  \
+                      mlab-unifi api GET '/site/{site}/topology' --surface v2\n  \
                       mlab-unifi api POST '/sites/{site}/clients/ID/actions' --data '{\"action\":\"AUTHORIZE_GUEST_ACCESS\"}'"
     )]
     Api(commands::api::ApiArgs),
 }
 
 /// Paging flags, shared by every list command.
+///
+/// Everything is fetched by default; the flags are there to take a slice
+/// instead, which is what `--limit` means: one page of that size.
 #[derive(Args, Debug, Clone, Default)]
 pub struct ListArgs {
-    /// Follow pagination until every item is fetched
-    #[arg(long)]
-    pub all: bool,
-    /// Page size
+    /// Return a single page of this size instead of everything
     #[arg(long, value_name = "N")]
     pub limit: Option<u32>,
-    /// Start offset (local mode)
+    /// Where that page starts
     #[arg(long, default_value_t = 0, value_name = "N")]
     pub offset: u32,
 }

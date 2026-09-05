@@ -1,10 +1,9 @@
-//! HTTP handler for both UniFi APIs.
+//! HTTP handler for every UniFi API this CLI speaks to.
 //!
-//! * local: `https://<host>/proxy/network/integration/v1`, offset/limit paging
-//!   (`{offset,limit,count,totalCount,data}`), self-signed TLS by default.
-//! * cloud: `https://api.ui.com`, cursor paging (`{data,nextToken}`), real TLS.
-//!
-//! Both authenticate with the `X-API-KEY` header, so one client covers the two.
+//! A local console answers on three separate surfaces, all with the same
+//! `X-API-KEY` header (see [`Surface`]); the cloud is a fourth base URL. One
+//! client covers them because only the base URL, the envelope and the paging
+//! style differ.
 
 use std::time::Duration;
 
@@ -23,6 +22,22 @@ const PAGE_SIZE: u32 = 200;
 
 /// Cloud base URL, overridable through `UNIFI_SITE_MANAGER_URL` for testing.
 const CLOUD_BASE: &str = "https://api.ui.com";
+
+/// Which API surface of a console a request goes to.
+///
+/// Only [`Surface::Integration`] is documented by Ubiquiti. The other two are
+/// what the web app calls for itself: far richer, and free to disappear on any
+/// firmware update — so anything built on them degrades rather than fails.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Surface {
+    /// `/proxy/network/integration/v1` — documented, offset paging, site UUID.
+    Integration,
+    /// `/proxy/network/api` — the legacy API: `{meta,data}` envelope, no
+    /// paging, and the short site name rather than the UUID.
+    Legacy,
+    /// `/proxy/network/v2/api` — plain JSON, no envelope, no paging.
+    V2,
+}
 
 /// A non-2xx response from either API.
 #[derive(Debug)]
@@ -60,7 +75,11 @@ impl std::error::Error for ApiError {}
 /// A configured connection to one UniFi endpoint.
 pub struct Client {
     http: reqwest::Client,
+    /// Base URL of the documented surface; also what `base()` reports.
     base: String,
+    /// `https://<host>`, the root the other surfaces hang off. Empty in cloud
+    /// mode, which has only one surface.
+    root: String,
     mode: Mode,
 }
 
@@ -69,10 +88,12 @@ impl Client {
     pub fn new(profile: &Profile, timeout: Duration) -> Result<Self> {
         profile.validate()?;
 
+        let mut root = String::new();
         let base = match profile.mode {
             Mode::Local => {
                 let host = normalize_host(&profile.host)?;
-                format!("https://{host}/proxy/network/integration/v1")
+                root = format!("https://{host}");
+                format!("{root}/proxy/network/integration/v1")
             }
             Mode::Cloud => std::env::var("UNIFI_SITE_MANAGER_URL")
                 .ok()
@@ -102,6 +123,7 @@ impl Client {
         Ok(Client {
             http,
             base,
+            root,
             mode: profile.mode,
         })
     }
@@ -112,6 +134,21 @@ impl Client {
 
     pub fn base(&self) -> &str {
         &self.base
+    }
+
+    /// Base URL of one surface. Only the documented one exists in cloud mode.
+    fn surface_base(&self, surface: Surface) -> Result<String> {
+        if self.mode == Mode::Cloud {
+            return match surface {
+                Surface::Integration => Ok(self.base.clone()),
+                _ => Err(anyhow!("the Site Manager API has no legacy or v2 surface")),
+            };
+        }
+        Ok(match surface {
+            Surface::Integration => self.base.clone(),
+            Surface::Legacy => format!("{}/proxy/network/api", self.root),
+            Surface::V2 => format!("{}/proxy/network/v2/api", self.root),
+        })
     }
 
     /// The core handler: one request, one parsed JSON body.
@@ -126,7 +163,36 @@ impl Client {
         query: &[(String, String)],
         body: Option<&Value>,
     ) -> Result<Value> {
-        let url = format!("{}{}", self.base, path);
+        self.request_on(Surface::Integration, method, path, query, body)
+            .await
+    }
+
+    /// The same, against a chosen surface. The legacy `{meta,data}` envelope is
+    /// checked and unwrapped here so callers only ever see the payload.
+    pub async fn request_on(
+        &self,
+        surface: Surface,
+        method: Method,
+        path: &str,
+        query: &[(String, String)],
+        body: Option<&Value>,
+    ) -> Result<Value> {
+        let v = self.raw(surface, method, path, query, body).await?;
+        if surface == Surface::Legacy {
+            return unwrap_legacy(v);
+        }
+        Ok(v)
+    }
+
+    async fn raw(
+        &self,
+        surface: Surface,
+        method: Method,
+        path: &str,
+        query: &[(String, String)],
+        body: Option<&Value>,
+    ) -> Result<Value> {
+        let url = format!("{}{}", self.surface_base(surface)?, path);
         let mut req = self.http.request(method.clone(), &url);
         if !query.is_empty() {
             req = req.query(query);
@@ -190,19 +256,39 @@ impl Client {
         })
     }
 
-    /// One page, or every page, of a list endpoint. Handles both paging styles.
+    /// A list endpoint on the documented surface.
+    ///
+    /// `limit` is what decides how much is fetched: `None` walks every page
+    /// from `offset`, `Some(n)` returns exactly that one page. Both paging
+    /// styles are handled here so callers never see them.
     pub async fn list(
         &self,
         path: &str,
         query: &[(String, String)],
-        all: bool,
         offset: u32,
         limit: Option<u32>,
     ) -> Result<Vec<Value>> {
         match self.mode {
-            Mode::Local => self.list_offset(path, query, all, offset, limit).await,
-            Mode::Cloud => self.list_cursor(path, query, all, limit).await,
+            Mode::Local => self.list_offset(path, query, offset, limit).await,
+            Mode::Cloud => self.list_cursor(path, query, limit).await,
         }
+    }
+
+    /// A list on one of the internal surfaces. Neither paginates: the console
+    /// returns the whole collection in one response.
+    pub async fn list_on(
+        &self,
+        surface: Surface,
+        path: &str,
+        query: &[(String, String)],
+    ) -> Result<Vec<Value>> {
+        if surface == Surface::Integration {
+            return self.list(path, query, 0, None).await;
+        }
+        let v = self
+            .request_on(surface, Method::GET, path, query, None)
+            .await?;
+        Ok(array_of(&v))
     }
 
     /// Local paging: `offset` / `limit`, stop once `totalCount` is covered.
@@ -210,7 +296,6 @@ impl Client {
         &self,
         path: &str,
         query: &[(String, String)],
-        all: bool,
         offset: u32,
         limit: Option<u32>,
     ) -> Result<Vec<Value>> {
@@ -229,7 +314,7 @@ impl Client {
 
             let got = items.len() as u32;
             out.extend(items);
-            if !all || got == 0 || (at + got) as u64 >= total {
+            if limit.is_some() || got == 0 || (at + got) as u64 >= total {
                 break;
             }
             at += got;
@@ -242,7 +327,6 @@ impl Client {
         &self,
         path: &str,
         query: &[(String, String)],
-        all: bool,
         limit: Option<u32>,
     ) -> Result<Vec<Value>> {
         let mut out = Vec::new();
@@ -265,7 +349,7 @@ impl Client {
                 .and_then(Value::as_str)
                 .filter(|s| !s.is_empty())
                 .map(str::to_string);
-            if !all || next.is_none() {
+            if limit.is_some() || next.is_none() {
                 break;
             }
         }
@@ -307,6 +391,24 @@ fn parse_error(status: StatusCode, body: &[u8], retry_after: Option<u64>) -> Api
         message,
         retry_after,
     }
+}
+
+/// Check and strip the legacy `{meta:{rc,msg},data:[...]}` envelope.
+///
+/// The legacy API answers 200 with `rc: "error"` for a refusal, so the status
+/// code alone would let a failure through as an empty list.
+fn unwrap_legacy(v: Value) -> Result<Value> {
+    let Some(meta) = v.get("meta") else {
+        return Ok(v); // not enveloped after all; pass it through
+    };
+    if meta.get("rc").and_then(Value::as_str) == Some("error") {
+        let msg = meta
+            .get("msg")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown error");
+        return Err(anyhow!("legacy API error: {msg}"));
+    }
+    Ok(v.get("data").cloned().unwrap_or(Value::Null))
 }
 
 /// Flatten an error and its sources into one line.

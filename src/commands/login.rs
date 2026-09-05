@@ -144,11 +144,8 @@ async fn verify(p: &mut Profile, interactive: bool) -> Result<()> {
             p.site = pick_site(&c, &p.site, interactive).await?;
         }
         Mode::Cloud => {
-            let hosts = ui::spin(
-                "Testing api.ui.com",
-                c.list("/v1/hosts", &[], false, 0, Some(10)),
-            )
-            .await?;
+            let hosts =
+                ui::spin("Testing api.ui.com", c.list("/v1/hosts", &[], 0, Some(10))).await?;
             ui::success(&format!(
                 "connected, {} host(s) on the account",
                 hosts.len()
@@ -164,7 +161,7 @@ async fn verify(p: &mut Profile, interactive: bool) -> Result<()> {
 
 /// Confirm the configured site, or choose one from the console.
 async fn pick_site(c: &Client, want: &str, interactive: bool) -> Result<String> {
-    let sites = ui::spin("Listing sites", c.list("/sites", &[], true, 0, None))
+    let sites = ui::spin("Listing sites", c.list("/sites", &[], 0, None))
         .await
         .context("listing sites")?;
     let field = |v: &Value, k: &str| v.get(k).and_then(Value::as_str).unwrap_or("").to_string();

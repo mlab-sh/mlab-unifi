@@ -8,7 +8,7 @@ use anyhow::{bail, Context, Result};
 use serde_json::Value;
 
 use crate::ui;
-use crate::unifi::Client;
+use crate::unifi::{Client, Surface};
 
 /// Turn a site name, or an empty setting, into a site id.
 pub async fn resolve(c: &Client, want: &str) -> Result<String> {
@@ -16,7 +16,7 @@ pub async fn resolve(c: &Client, want: &str) -> Result<String> {
         return Ok(want.to_string());
     }
 
-    let sites = ui::spin("Resolving the site", c.list("/sites", &[], true, 0, None))
+    let sites = ui::spin("Resolving the site", c.list("/sites", &[], 0, None))
         .await
         .context("listing sites")?;
     let names = |k: &str| {
@@ -44,6 +44,31 @@ pub async fn resolve(c: &Client, want: &str) -> Result<String> {
         }
     }
     bail!("no site named {want:?} (known: {})", names("name"))
+}
+
+/// The short site name the internal surfaces use, from the documented UUID.
+///
+/// The two surfaces disagree on what a site is called: the documented one takes
+/// a UUID, the legacy and v2 ones take a short name (`default`). The mapping
+/// lives in the legacy site list, under `external_id`.
+pub async fn resolve_legacy(c: &Client, site_id: &str) -> Result<String> {
+    let sites = ui::spin(
+        "Resolving the site",
+        c.list_on(Surface::Legacy, "/self/sites", &[]),
+    )
+    .await
+    .context("listing sites on the legacy surface")?;
+
+    for s in &sites {
+        if field(s, "external_id") == site_id {
+            return Ok(field(s, "name"));
+        }
+    }
+    match sites.len() {
+        0 => bail!("the legacy surface reports no site"),
+        1 => Ok(field(&sites[0], "name")),
+        _ => bail!("no legacy site maps to {site_id}"),
+    }
 }
 
 fn field(v: &Value, k: &str) -> String {

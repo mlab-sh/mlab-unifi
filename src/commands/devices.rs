@@ -53,17 +53,13 @@ async fn list(c: &Client, ctx: &Ctx, a: &ListArgs) -> Result<()> {
                 "/sites/{}/devices",
                 esc(&site::resolve(c, &ctx.profile.site).await?)
             );
-            let rows = ui::spin(
-                "Listing devices",
-                c.list(&path, &[], a.all, a.offset, a.limit),
-            )
-            .await?;
+            let rows = ui::spin("Listing devices", c.list(&path, &[], a.offset, a.limit)).await?;
             (rows, format!("Devices on {}", ctx.profile.host))
         }
         Mode::Cloud => {
             let rows = ui::spin(
                 "Listing devices",
-                c.list("/v1/devices", &[], a.all, a.offset, a.limit),
+                c.list("/v1/devices", &[], a.offset, a.limit),
             )
             .await?;
             (rows, "Devices".to_string())
