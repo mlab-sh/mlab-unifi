@@ -16,6 +16,11 @@ historical one on the MAC address and reports `activeNow` per device. See
 **Raw access to every surface.** `api --surface legacy|v2` makes the whole
 exploration reproducible from the CLI. See [Api](Api).
 
+**Fingerprint resolution.** `clients list --all` names devices from the
+console's own fingerprint table, with `--min-score` separating facts from
+guesses and an opt-in `--allow-web` vendor lookup for the gaps. See
+[Identity](Identity).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single
@@ -39,15 +44,11 @@ without isolation, a short pre-shared key. Output graded by severity, with a
 third state next to pass and fail: **not evaluable**, for when the route was
 unavailable.
 
-**4. Fingerprint resolution.** Fetch the lookup table and join locally, so the
-inventory speaks in vendors and operating systems instead of numeric
-identifiers.
-
-**5. CVE correlation.** Model and version against a public database. The only
+**4. CVE correlation.** Model and version against a public database. The only
 step in the pipeline that leaves the network, and it carries firmware versions
 only.
 
-**6. The real-time collector.** Hold the three WebSocket channels open and log
+**5. The real-time collector.** Hold the three WebSocket channels open and log
 what arrives, first to document the message format, then to detect on it.
 
 ## Also wanted

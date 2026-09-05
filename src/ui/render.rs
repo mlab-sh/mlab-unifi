@@ -84,6 +84,31 @@ pub const INVENTORY_COLS: &[Col] = &[
     Col("LAST SEEN", &["lastSeen"]),
 ];
 
+/// The inventory once identities are resolved. `os` and `firstSeen` stay in the
+/// JSON: eleven columns do not fit a terminal, and this view answers "what is
+/// this thing", not "when did it appear".
+pub const IDENTITY_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("ACTIVE", &["activeNow"]),
+    Col("VENDOR", &["vendor"]),
+    Col("DEVICE", &["deviceLabel", "device"]),
+    Col("CONF", &["confidence"]),
+    Col("IP", &["ipAddress"]),
+    Col("MAC", &["macAddress"]),
+    Col("LAST SEEN", &["lastSeen"]),
+];
+
+/// The live listing once identities are resolved.
+pub const LIVE_IDENTITY_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("VENDOR", &["vendor"]),
+    Col("DEVICE", &["deviceLabel", "device"]),
+    Col("CONF", &["confidence"]),
+    Col("IP", &["ipAddress"]),
+    Col("MAC", &["macAddress"]),
+    Col("TYPE", &["type"]),
+];
+
 pub const HOST_COLS: &[Col] = &[
     Col("NAME", &["reportedState.hostname", "reportedState.name"]),
     Col("TYPE", &["type"]),

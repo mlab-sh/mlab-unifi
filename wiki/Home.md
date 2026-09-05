@@ -34,6 +34,9 @@ you ask for explicitly, and no data leaves your machine.
   uses explains most of its behaviour.
 - **[Configuration](Configuration)** - profiles, the precedence between flags,
   environment and file, and where secrets live.
+- **[Identity](Identity)** - how a MAC becomes a named device: the console's
+  fingerprint engine, what `--min-score` actually gates, and the opt-in vendor
+  lookup for the gaps.
 - **[Output](Output)** - a terminal render by default, raw JSON with
   `-o json`, and the rules that keep the two from mixing.
 - **[Passive security](Passive-Security)** - the catalogue of defensive work

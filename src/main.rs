@@ -6,12 +6,14 @@
 //! | module     | role                                                        |
 //! | ---------- | ----------------------------------------------------------- |
 //! | `unifi`    | the APIs: HTTP handler, profiles, site resolution            |
+//! | `enrich`   | turning what the console observed into an identity           |
 //! | `ui`       | everything the user sees: progress on stderr, rendering      |
 //! | `cli`      | the clap surface and the dispatch                            |
 //! | `commands` | one module per command                                       |
 
 mod cli;
 mod commands;
+mod enrich;
 mod ui;
 mod unifi;
 

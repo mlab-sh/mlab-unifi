@@ -17,6 +17,7 @@
 
 **Concepts**
 - [Surfaces](Surfaces)
+- [Identity](Identity)
 - [Configuration](Configuration)
 - [Output](Output)
 

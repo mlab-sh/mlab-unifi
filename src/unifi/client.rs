@@ -365,7 +365,9 @@ impl Client {
 
 /// Turn an API JSON error body into a typed error.
 fn parse_error(status: StatusCode, body: &[u8], retry_after: Option<u64>) -> ApiError {
-    let text = String::from_utf8_lossy(body).trim().to_string();
+    // Never echo an unparsed body whole: a refusal from the servlet container
+    // is a full HTML page, which buries the status code under a stylesheet.
+    let text = summarize(&String::from_utf8_lossy(body));
 
     let (code, message) = match serde_json::from_slice::<Value>(body) {
         Ok(v) => {
@@ -391,6 +393,58 @@ fn parse_error(status: StatusCode, body: &[u8], retry_after: Option<u64>) -> Api
         message,
         retry_after,
     }
+}
+
+/// Reduce a response body to one readable line: markup stripped, whitespace
+/// collapsed, truncated.
+fn summarize(body: &str) -> String {
+    let mut out = String::new();
+    let mut in_tag = false;
+    let mut tag = String::new();
+    // <style> and <script> hold text that is not prose; stripping their tags
+    // alone would leave a stylesheet in the error message.
+    let mut in_opaque = false;
+    let mut last_space = true;
+
+    for ch in body.chars() {
+        match ch {
+            '<' => {
+                in_tag = true;
+                tag.clear();
+            }
+            '>' if in_tag => {
+                in_tag = false;
+                let name = tag.trim().to_ascii_lowercase();
+                if name.starts_with("style") || name.starts_with("script") {
+                    in_opaque = true;
+                } else if name.starts_with("/style") || name.starts_with("/script") {
+                    in_opaque = false;
+                }
+            }
+            c if in_tag => tag.push(c),
+            _ if in_opaque => {}
+            c if c.is_whitespace() => {
+                if !last_space {
+                    out.push(' ');
+                    last_space = true;
+                }
+            }
+            c => {
+                out.push(c);
+                last_space = false;
+                if out.chars().count() >= 160 {
+                    out.push('…');
+                    break;
+                }
+            }
+        }
+    }
+
+    let trimmed = out.trim();
+    if trimmed.is_empty() && !body.is_empty() {
+        return format!("non-JSON body, {} bytes", body.len());
+    }
+    trimmed.to_string()
 }
 
 /// Check and strip the legacy `{meta:{rc,msg},data:[...]}` envelope.
@@ -484,6 +538,29 @@ mod tests {
     }
 
     #[test]
+    fn an_html_error_page_is_reduced_to_a_line() {
+        let page = "<!doctype html><html><head><title>HTTP Status 404</title>\
+                    <style>body {font-family:Tahoma;}</style></head>\
+                    <body><h1>HTTP Status 404 - Not Found</h1></body></html>";
+        let got = summarize(page);
+        assert!(
+            got.contains("HTTP Status 404"),
+            "the useful part survives: {got}"
+        );
+        assert!(!got.contains('<'), "no markup survives");
+        assert!(!got.contains("Tahoma"), "the stylesheet goes with its tag");
+    }
+
+    #[test]
+    fn a_body_with_no_text_at_all_is_described_rather_than_echoed() {
+        assert_eq!(
+            summarize("<html><body></body></html>"),
+            "non-JSON body, 26 bytes"
+        );
+        assert_eq!(summarize(""), "");
+    }
+
+    #[test]
     fn parse_error_reads_both_error_shapes() {
         let e = parse_error(
             StatusCode::NOT_FOUND,
@@ -502,6 +579,6 @@ mod tests {
         assert!(e.to_string().contains("retry after 3s"));
 
         let e = parse_error(StatusCode::BAD_GATEWAY, b"<html>nope</html>", None);
-        assert_eq!(e.message, "<html>nope</html>");
+        assert_eq!(e.message, "nope");
     }
 }

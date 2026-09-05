@@ -5,22 +5,47 @@ What is connected to a site, and with `--all`, what ever was. Local mode only.
 ```bash
 mlab-unifi clients list
 mlab-unifi clients list --all
+mlab-unifi clients list --all --allow-web
 mlab-unifi clients get <id>
 mlab-unifi clients authorize <id>
 ```
 
+| Flag | Effect |
+| --- | --- |
+| `--all` | Every client ever seen, not only those connected now |
+| `--allow-web` | Resolve the vendor of unnamed addresses through mlab.sh |
+| `--min-score <N>` | Confidence below which a model is marked as a guess. Default 90 |
+| `--no-resolve` | Skip identity resolution entirely |
+
+The last three are covered on [Identity](Identity).
+
 ## `list`
 
-The clients connected right now, from the [integration surface](Surfaces).
+The clients connected right now, named through [identity resolution](Identity).
 
 ```
   Clients
 
-  NAME               IP              MAC                TYPE      ID
-  rpi-01 36:85       192.168.15.101  88:a2:9e:5f:36:85  WIRED     bcbeac5b-...
-  Terramaster F-426  192.168.16.20   6c:bf:b5:04:8f:14  WIRED     a1f86f2a-...
+  NAME                VENDOR                      DEVICE                        CONF  IP              MAC                TYPE
+  rpi-01 36:85        Raspberry Pi (Trading) Ltd                                      192.168.15.101  88:a2:9e:5f:36:85  WIRED
+  homelab-p1 be:7c    Dell, Inc.                  Dell Laptop                   99    192.168.16.17   00:4e:01:a3:be:7c  WIRED
+  Terramaster F-426   Philips Hue                 Philips Hue Bridge (Gen 2) ?  1     192.168.16.20   6c:bf:b5:04:8f:14  WIRED
 
   30 clients
+  › 14 device(s) identified below 90% confidence, shown as reported
+```
+
+The vendor and model come from the console's fingerprint engine, which lives on
+the [legacy surface](Surfaces): the documented API carries none. So the live
+listing fetches that list too, unless `--no-resolve` says not to. If it is
+unavailable, the listing still prints without the identity columns and says so.
+
+With `--no-resolve` the table falls back to what the documented API alone
+returns, including the integration `ID` column:
+
+```
+  NAME           IP              MAC                TYPE   ID
+  rpi-01 36:85   192.168.15.101  88:a2:9e:5f:36:85  WIRED  bcbeac5b-c25a-3240-8188-6a0f392977af
 ```
 
 ## `list --all`, the asset inventory
@@ -31,14 +56,21 @@ first appeared and an `ACTIVE` column saying whether it is here right now.
 ```
   Client inventory
 
-  NAME                  ACTIVE  IP              MAC                TYPE      FIRST SEEN            LAST SEEN
-  db01                  true    192.168.18.200  6c:3c:8c:4c:e5:c7  WIRED     2026-05-06T13:13:53Z  2026-09-05T10:26:04Z
-  Nintendo Switch       true    192.168.31.155  bc:74:4b:11:9d:dd  WIRELESS  2025-09-29T19:36:19Z  2026-09-04T17:05:25Z
-  allhub                false   192.168.16.10   dc:a6:32:1e:55:6c  WIRED     2026-03-05T12:06:57Z  2026-05-15T14:21:21Z
+  NAME             ACTIVE  VENDOR              DEVICE                CONF  IP              MAC                LAST SEEN
+  db01             true    Dell Inc.                                       192.168.18.200  6c:3c:8c:4c:e5:c7  2026-09-05T11:14:59Z
+  Iphone de Meg    true    Apple, Inc.         Apple iPhone 14 Pro   100   192.168.11.189  c2:34:34:6a:7c:31  2026-09-05T08:35:37Z
+  Nintendo Switch  true    Nintendo Co., Ltd.  Nintendo Switch       90    192.168.31.155  bc:74:4b:11:9d:dd  2026-09-04T17:05:25Z
+  iPhone 7d:2c     true    (randomized)        Netgear RN526X ?            192.168.31.226  56:6f:4b:41:7d:2c  2026-09-03T16:59:32Z
 
   49 clients
   › 30 connected now, 19 seen before
+  › 25 device(s) identified below 90% confidence, shown as reported
+  › 3 device(s) unidentified: run with --allow-web to resolve their vendor through mlab.sh
 ```
+
+The identity columns come from [Identity](Identity). Without them (with
+`--no-resolve`, or when the lookup table is unreachable) the table falls back to
+`FIRST SEEN` and `LAST SEEN` instead.
 
 Connected clients sort first, then by how recently each was seen. The bottom of
 the list is what has drifted away.
@@ -100,8 +132,19 @@ gives appearances and disappearances without any scanning. See
 
 ## `get`
 
-One client in full, by its integration identifier (the `ID` column above, not
-the MAC).
+One client in full, by MAC address or by integration id:
+
+```bash
+mlab-unifi clients get 88:a2:9e:5f:36:85
+mlab-unifi clients get bcbeac5b-c25a-3240-8188-6a0f392977af
+```
+
+Six hex pairs, separated by colons or hyphens, are treated as a MAC and looked
+up in the live client list; anything else is used as an id. The MAC is on every
+row of the table and is the key people actually have, so prefer it.
+
+A MAC only resolves for a client that is connected right now, since the id it
+maps to is the documented API's and only live clients have one.
 
 ## `authorize`
 
