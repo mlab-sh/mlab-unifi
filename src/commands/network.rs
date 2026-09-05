@@ -31,6 +31,15 @@ pub enum NetworkCmd {
     Exposure,
     /// Firewall zones and the networks in them
     Zones,
+    /// Firewall policies, and what is measurably wrong with them
+    Policies {
+        /// Include the return rules the console generates for each of yours
+        #[arg(long)]
+        derived: bool,
+        /// Include the system-defined rules as well
+        #[arg(long)]
+        all: bool,
+    },
 }
 
 pub async fn run(c: &Client, ctx: &Ctx, cmd: NetworkCmd) -> Result<()> {
@@ -42,6 +51,7 @@ pub async fn run(c: &Client, ctx: &Ctx, cmd: NetworkCmd) -> Result<()> {
         NetworkCmd::Get { which } => get(c, &site, &which).await,
         NetworkCmd::Exposure => exposure(c, &site).await,
         NetworkCmd::Zones => zones(c, &site).await,
+        NetworkCmd::Policies { derived, all } => policies(c, &site, derived, all).await,
     }
 }
 
@@ -434,4 +444,304 @@ async fn legacy_networks(c: &Client, site: &str) -> Result<Vec<Value>> {
         ),
     )
     .await
+}
+
+// ---- firewall policies ------------------------------------------------------
+
+/// Rule hygiene: what can be established from the rules themselves.
+///
+/// Everything here is a property of a single rule or of an exact pair, never of
+/// an ordering. See [`ORDER_CAVEAT`] for why.
+async fn policies(c: &Client, site: &str, derived: bool, all: bool) -> Result<()> {
+    let path = format!("/sites/{}/firewall/policies", esc(site));
+    let raw = ui::spin("Listing firewall policies", c.list(&path, &[], 0, None)).await?;
+
+    let zones = zone_list(c, site).await.unwrap_or_default();
+    let zone_names: HashMap<String, String> = zones
+        .iter()
+        .filter_map(|z| {
+            Some((
+                z.get("id")?.as_str()?.to_string(),
+                z.get("name")?.as_str()?.to_string(),
+            ))
+        })
+        .collect();
+    // A zone with no network can never match anything, so a rule pointing at
+    // one is dead by construction rather than by ordering.
+    let empty_zones: HashMap<String, String> = zones
+        .iter()
+        .filter(|z| {
+            z.get("networkIds")
+                .and_then(Value::as_array)
+                .is_some_and(|a| a.is_empty())
+        })
+        .filter_map(|z| {
+            Some((
+                z.get("id")?.as_str()?.to_string(),
+                z.get("name")?.as_str()?.to_string(),
+            ))
+        })
+        .collect();
+
+    let lists = matching_lists(c, site).await;
+
+    let keep = |origin: &str| match origin {
+        "USER_DEFINED" => true,
+        "DERIVED" => derived || all,
+        _ => all,
+    };
+
+    let rows: Vec<Value> = raw
+        .iter()
+        .filter(|p| keep(p.pointer("/metadata/origin").and_then(Value::as_str).unwrap_or("")))
+        .map(|p| {
+            let side = |which: &str| {
+                let s = p.get(which).cloned().unwrap_or(Value::Null);
+                let zone_id = s.get("zoneId").and_then(Value::as_str).unwrap_or_default().to_string();
+                let zone = zone_names.get(&zone_id).cloned().unwrap_or_else(|| zone_id.clone());
+                let filter = describe_filter(s.get("trafficFilter"), &lists);
+                let label = if filter.is_empty() { zone.clone() } else { format!("{zone} · {filter}") };
+                (zone_id, zone, filter, label)
+            };
+            let (src_id, src_zone, src_filter, src_label) = side("source");
+            let (dst_id, dst_zone, dst_filter, dst_label) = side("destination");
+
+            json!({
+                "name": p.get("name").cloned().unwrap_or(Value::Null),
+                "action": p.pointer("/action/type").cloned().unwrap_or(Value::Null),
+                "from": src_label,
+                "to": dst_label,
+                "log": if p.get("loggingEnabled").and_then(Value::as_bool).unwrap_or(false) { "on" } else { "off" },
+                "enabled": p.get("enabled").cloned().unwrap_or(Value::Null),
+                "origin": p.pointer("/metadata/origin").cloned().unwrap_or(Value::Null),
+                "index": p.get("index").cloned().unwrap_or(Value::Null),
+                "id": p.get("id").cloned().unwrap_or(Value::Null),
+                // The normalized match, used to find exact duplicates. Two rules
+                // sharing it accept or refuse exactly the same traffic.
+                "match": format!("{src_id}|{src_filter}|{dst_id}|{dst_filter}|{}|{}",
+                    p.pointer("/action/type").and_then(Value::as_str).unwrap_or(""),
+                    p.pointer("/ipProtocolScope/ipVersion").and_then(Value::as_str).unwrap_or("")),
+                "sourceZone": src_zone,
+                "destinationZone": dst_zone,
+                "sourceZoneId": src_id,
+                "destinationZoneId": dst_id,
+                "wideOpen": src_filter.is_empty() && dst_filter.is_empty(),
+            })
+        })
+        .collect();
+
+    render::heading("Firewall policies");
+    render::list(&rows, render::POLICY_COLS);
+    render::count(rows.len(), "policy");
+
+    if render::is_json() {
+        return Ok(());
+    }
+    report(&rows, &raw, &empty_zones, derived || all, all);
+    Ok(())
+}
+
+/// Rule ordering is not analysed, and this says why rather than staying silent.
+const ORDER_CAVEAT: &str = "rule order is not analysed: the API reports `index` as a bucket, \
+     not a sequence, so which rule wins inside one cannot be established and no rule is \
+     called shadowed";
+
+fn report(
+    rows: &[Value],
+    raw: &[Value],
+    empty_zones: &HashMap<String, String>,
+    wide_set: bool,
+    showing_system: bool,
+) {
+    let s = |v: &Value, k: &str| v[k].as_str().unwrap_or_default().to_string();
+
+    // Findings cover what the operator can act on. System rules are the default
+    // zone matrix: most of them reference an empty zone or match everything by
+    // design, and reporting that is noise rather than a finding.
+    let owned: Vec<&Value> = rows
+        .iter()
+        .filter(|r| r["origin"].as_str() != Some("SYSTEM_DEFINED"))
+        .collect();
+    let rows: Vec<Value> = owned.into_iter().cloned().collect();
+    let rows = &rows[..];
+
+    if showing_system {
+        ui::info(&format!(
+            "{} system rule(s) shown but not assessed: they are the default zone matrix",
+            raw.iter()
+                .filter(|r| r.pointer("/metadata/origin").and_then(Value::as_str)
+                    == Some("SYSTEM_DEFINED"))
+                .count()
+        ));
+    }
+
+    let disabled = rows.iter().filter(|r| r["enabled"] == json!(false)).count();
+    if disabled > 0 {
+        ui::info(&format!("{disabled} rule(s) present but disabled"));
+    }
+
+    let unlogged = rows.iter().filter(|r| r["log"] == json!("off")).count();
+    if unlogged > 0 {
+        ui::warning(&format!(
+            "{unlogged} rule(s) with logging off: what they allow is never recorded, \
+             and there is nothing to go back to afterwards"
+        ));
+    }
+
+    // Exact duplicates, on the normalized match rather than on the name: two
+    // rules can be named differently and still accept the same traffic.
+    // Grouped by origin as well as by match: a zone-symmetric rule and the
+    // return rule the console generates from it necessarily match the same
+    // traffic, and calling that a duplicate blames the operator for the
+    // console's own bookkeeping.
+    let mut seen: HashMap<(String, String), Vec<String>> = HashMap::new();
+    for r in rows {
+        seen.entry((s(r, "match"), s(r, "origin")))
+            .or_default()
+            .push(s(r, "name"));
+    }
+    let dupes: Vec<&Vec<String>> = seen.values().filter(|v| v.len() > 1).collect();
+    if !dupes.is_empty() {
+        ui::warning(&format!(
+            "{} set(s) of rules match identical traffic: {}",
+            dupes.len(),
+            dupes
+                .iter()
+                .map(|v| v.join(" = "))
+                .collect::<Vec<_>>()
+                .join("; ")
+        ));
+    }
+
+    let dead: Vec<String> = rows
+        .iter()
+        .filter(|r| {
+            empty_zones.contains_key(&s(r, "sourceZoneId"))
+                || empty_zones.contains_key(&s(r, "destinationZoneId"))
+        })
+        .map(|r| s(r, "name"))
+        .collect();
+    if !dead.is_empty() {
+        ui::warning(&format!(
+            "{} rule(s) reference a zone holding no network, so nothing can match them: {}",
+            dead.len(),
+            capped(&dead)
+        ));
+    }
+
+    let self_zone = rows
+        .iter()
+        .filter(|r| {
+            !s(r, "sourceZoneId").is_empty() && s(r, "sourceZoneId") == s(r, "destinationZoneId")
+        })
+        .count();
+    if self_zone > 0 {
+        ui::info(&format!(
+            "{self_zone} rule(s) have the same zone on both sides, which traffic inside a \
+             zone usually does not need"
+        ));
+    }
+
+    let wide = rows.iter().filter(|r| r["wideOpen"] == json!(true)).count();
+    if wide > 0 {
+        ui::info(&format!(
+            "{wide} of {} rule(s) match any traffic between their zones: segmentation is \
+             at zone granularity, which may be the intent",
+            rows.len()
+        ));
+    }
+
+    ui::info(ORDER_CAVEAT);
+    if !wide_set {
+        let hidden = raw.len() - rows.len();
+        ui::info(&format!(
+            "{hidden} generated and system rule(s) not shown, add --derived or --all"
+        ));
+    }
+}
+
+/// Join names for a one-line message, keeping it readable however many there are.
+fn capped(names: &[String]) -> String {
+    const MAX: usize = 6;
+    if names.len() <= MAX {
+        return names.join(", ");
+    }
+    format!(
+        "{}, and {} more",
+        names[..MAX].join(", "),
+        names.len() - MAX
+    )
+}
+
+/// Named port and address lists, so a rule shows real ports rather than a uuid.
+async fn matching_lists(c: &Client, site: &str) -> HashMap<String, String> {
+    let path = format!("/sites/{}/traffic-matching-lists", esc(site));
+    let Ok(lists) = c.list(&path, &[], 0, None).await else {
+        return HashMap::new();
+    };
+
+    lists
+        .iter()
+        .filter_map(|l| {
+            let id = l.get("id")?.as_str()?.to_string();
+            let name = l.get("name").and_then(Value::as_str).unwrap_or("list");
+            let items: Vec<String> = l
+                .get("items")?
+                .as_array()?
+                .iter()
+                .filter_map(|i| i.get("value").map(scalar_text))
+                .collect();
+            Some((id, format!("{name} ({})", items.join(","))))
+        })
+        .collect()
+}
+
+/// One-line description of what a side of a rule matches, empty when it matches
+/// everything.
+fn describe_filter(filter: Option<&Value>, lists: &HashMap<String, String>) -> String {
+    let Some(f) = filter else {
+        return String::new();
+    };
+
+    if let Some(ips) = f
+        .pointer("/ipAddressFilter/items")
+        .and_then(Value::as_array)
+    {
+        let vals: Vec<String> = ips
+            .iter()
+            .filter_map(|i| i.get("value").map(scalar_text))
+            .collect();
+        if !vals.is_empty() {
+            return vals.join(", ");
+        }
+    }
+    if let Some(pf) = f.get("portFilter") {
+        if let Some(id) = pf.get("trafficMatchingListId").and_then(Value::as_str) {
+            return lists
+                .get(id)
+                .cloned()
+                .unwrap_or_else(|| format!("list {id}"));
+        }
+        if let Some(ports) = pf.get("items").and_then(Value::as_array) {
+            let vals: Vec<String> = ports
+                .iter()
+                .filter_map(|i| i.get("value").map(scalar_text))
+                .collect();
+            if !vals.is_empty() {
+                return format!("ports {}", vals.join(","));
+            }
+        }
+    }
+    // A filter shape we do not decode yet: name it rather than claim "any".
+    f.get("type")
+        .and_then(Value::as_str)
+        .map(str::to_string)
+        .unwrap_or_default()
+}
+
+fn scalar_text(v: &Value) -> String {
+    match v {
+        Value::String(s) => s.clone(),
+        other => other.to_string(),
+    }
 }

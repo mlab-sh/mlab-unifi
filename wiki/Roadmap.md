@@ -30,6 +30,10 @@ join the documented network list to the legacy segmentation fields and report
 port forwards with their logging and source restrictions. See
 [Network](Network).
 
+**Firewall rule hygiene.** `network policies` reports unlogged, duplicate, dead
+and over-broad rules across the three origin classes, and states plainly that
+ordering is not analysed. See [Network](Network).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single
@@ -47,17 +51,13 @@ data, because a check that could not run must not report success.
 client, a changed rule, an opened port, a firmware change, a neighbouring BSSID
 that appeared. This is where passive detection becomes real.
 
-**3. Firewall rule hygiene.** The v2 policy set, read for permissive, disabled,
-unlogged and dead rules. The other half of the segmentation story, and the
-largest single payload on the console.
-
-**4. The posture audit.** Deterministic checks over one snapshot: a port
+**3. The posture audit.** Deterministic checks over one snapshot: a port
 forward without logging, optional PMF, an IPS with no active category, a VLAN
 without isolation, a short pre-shared key. Output graded by severity, with a
 third state next to pass and fail: **not evaluable**, for when the route was
 unavailable.
 
-**5. The real-time collector.** Hold the three WebSocket channels open and log
+**4. The real-time collector.** Hold the three WebSocket channels open and log
 what arrives, first to document the message format, then to detect on it.
 
 ## Also wanted

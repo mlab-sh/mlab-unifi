@@ -147,6 +147,17 @@ pub const FORWARD_COLS: &[Col] = &[
     Col("SOURCE", &["source"]),
 ];
 
+/// Firewall policies, read for hygiene rather than for configuration.
+pub const POLICY_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("ACTION", &["action"]),
+    Col("FROM", &["from"]),
+    Col("TO", &["to"]),
+    Col("LOG", &["log"]),
+    Col("ON", &["enabled"]),
+    Col("ORIGIN", &["origin"]),
+];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),
@@ -176,9 +187,23 @@ pub fn count(n: usize, noun: &str) {
     if is_json() {
         return;
     }
-    let plural = if n == 1 { "" } else { "s" };
     println!();
-    println!("  {}", format!("{n} {noun}{plural}").dimmed());
+    println!("  {}", format!("{n} {}", plural(noun, n)).dimmed());
+}
+
+/// English plural, enough for the nouns this CLI counts.
+fn plural(noun: &str, n: usize) -> String {
+    if n == 1 {
+        return noun.to_string();
+    }
+    match noun.chars().last() {
+        // "policy" -> "policies", but "day" -> "days": only a consonant before
+        // the y takes the -ies form.
+        Some('y') if !noun.ends_with(['a', 'e', 'i', 'o', 'u', 'y']) => noun.to_string(),
+        Some('y') => format!("{}ies", &noun[..noun.len() - 1]),
+        Some('s') | Some('x') | Some('z') => format!("{noun}es"),
+        _ => format!("{noun}s"),
+    }
 }
 
 /// An aligned key/value block, for status output the CLI composes itself
@@ -610,6 +635,14 @@ mod tests {
             has_content(&json!(false)),
             "false is a value, not an absence"
         );
+    }
+
+    #[test]
+    fn nouns_are_pluralized_rather_than_suffixed() {
+        assert_eq!(plural("device", 2), "devices");
+        assert_eq!(plural("policy", 2), "policies", "not \"policys\"");
+        assert_eq!(plural("client", 1), "client");
+        assert_eq!(plural("zone", 0), "zones", "none is still plural");
     }
 
     #[test]

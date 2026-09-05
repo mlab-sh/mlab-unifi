@@ -21,7 +21,7 @@ tested so far.
 | End of life | hardware past support, not adoptable, unsupported | `stat/device` | direct |
 | Inbound exposure (shipped) | ports reachable from the internet, UPnP, forwards with no logging | `rest/portforward`, `rest/networkconf` | direct |
 | Segmentation audit (shipped) | VLANs without isolation, mDNS crossing boundaries, routable guests | `rest/networkconf`, firewall zones | direct |
-| Rule hygiene | permissive, disabled, unlogged or dead firewall rules | `v2 firewall-policies` | derived |
+| Rule hygiene (shipped) | unlogged, duplicate, dead and over-broad rules | `firewall/policies` | derived, ordering excluded |
 | Wi-Fi hardening | WPA2 only, transition mode, optional PMF, weak pre-shared key | `rest/wlanconf` | direct |
 | RF reconnaissance | the full 802.11 neighbourhood: encryption, channel, power, vendor | `stat/rogueap` | direct |
 | Evil twin | a foreign BSSID broadcasting your SSID, or a known SSID in the clear | `stat/rogueap` joined to `rest/wlanconf` | derived |
