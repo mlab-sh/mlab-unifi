@@ -237,6 +237,14 @@ pub const POSTURE_CHECK_COLS: &[Col] = &[
     Col("DETAIL", &["detail"]),
 ];
 
+/// Zones reachable from a starting point.
+pub const BLAST_COLS: &[Col] = &[
+    Col("ZONE", &["zone"]),
+    Col("REACHES", &["reaches"]),
+    Col("HOSTS", &["hosts"]),
+    Col("NETWORKS", &["networks"]),
+];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),

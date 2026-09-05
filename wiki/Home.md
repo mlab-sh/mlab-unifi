@@ -27,6 +27,7 @@ you ask for explicitly, and no data leaves your machine.
 | [`shadow`](Shadow) | What turned up on the network that nobody announced. |
 | [`posture`](Posture) | What the site's settings say it is defending, and with what. |
 | [`footprint`](Footprint) | What this site looks like from the outside. |
+| [`blast`](Blast) | What a compromised client would reach. |
 | [`hosts`](Hosts) | Consoles visible on a Site Manager account (cloud only). |
 | [`api`](Api) | Raw request against any [surface](Surfaces), for everything not wrapped yet. |
 | [`profile`](Configuration) | List, show, select and delete saved profiles. |

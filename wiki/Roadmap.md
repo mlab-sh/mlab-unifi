@@ -50,6 +50,10 @@ keeping "off" apart from "reads as protection without being one". See
 reachability, and enriches the public address on request. See
 [Footprint](Footprint).
 
+**Blast radius.** `blast` computes what a client's zone reaches, from a rule
+matrix that is sound because per-pair ordering is unambiguous. See
+[Blast](Blast).
+
 ## Next
 
 **1. A dated snapshot.** One command that pulls the useful routes into a single

@@ -133,6 +133,9 @@ pub enum Cmd {
     /// What this site looks like from the outside (local only)
     Footprint(commands::footprint::FootprintArgs),
 
+    /// What a compromised client would reach (local only)
+    Blast(commands::blast::BlastArgs),
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -200,6 +203,7 @@ pub async fn run() -> Result<()> {
         Cmd::Shadow(a) => commands::shadow::run(&c, &ctx, &a).await,
         Cmd::Posture => commands::posture::run(&c, &ctx).await,
         Cmd::Footprint(a) => commands::footprint::run(&c, &ctx, &a).await,
+        Cmd::Blast(a) => commands::blast::run(&c, &ctx, &a).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }

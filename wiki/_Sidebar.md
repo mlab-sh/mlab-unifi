@@ -15,6 +15,7 @@
 - [shadow](Shadow)
 - [posture](Posture)
 - [footprint](Footprint)
+- [blast](Blast)
 - [hosts](Hosts)
 - [api](Api)
 - [profile](Configuration)
