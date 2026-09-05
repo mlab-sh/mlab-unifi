@@ -65,11 +65,11 @@ the rules kept apart from the collection so each one is testable. See
 file, secrets removed on write and unreadable resources recorded as such. See
 [Snapshot](Snapshot).
 
-## Next
+**The diff.** `diff` compares two snapshots, presence for inventory and field
+by field for configuration, and refuses what it cannot honestly compare. See
+[Diff](Diff).
 
-**1. The diff.** Compare two snapshots and qualify the differences: a new
-client, a changed rule, an opened port, a firmware change, a neighbouring BSSID
-that appeared. This is where passive detection becomes real.
+## Next
 
 ## Also wanted
 

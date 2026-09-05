@@ -17,7 +17,7 @@ mlab-unifi snapshot --resources        # what a snapshot collects, no network
   secrets removed  20
   size             1289 KB
 
-  › a snapshot on its own answers nothing; take a second one later and compare them
+  › a snapshot on its own answers nothing; take a second one later and compare them with [`diff`](Diff)
 ```
 
 ## The point is the second file

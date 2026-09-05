@@ -6,6 +6,7 @@
 **Commands**
 - [audit](Audit)
 - [snapshot](Snapshot)
+- [diff](Diff)
 - [login](Login)
 - [ping](Ping)
 - [info](Info)

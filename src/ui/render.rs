@@ -262,6 +262,14 @@ pub const RESOURCE_COLS: &[Col] = &[
 
 pub const SNAPSHOT_COLS: &[Col] = &[Col("SNAPSHOT", &["snapshot"]), Col("KB", &["kb"])];
 
+/// What changed between two snapshots.
+pub const DIFF_COLS: &[Col] = &[
+    Col("RESOURCE", &["resource"]),
+    Col("CHANGE", &["change"]),
+    Col("ITEM", &["item"]),
+    Col("DETAIL", &["detail"]),
+];
+
 pub const ZONE_COLS: &[Col] = &[
     Col("ZONE", &["name"]),
     Col("ORIGIN", &["origin"]),
@@ -580,6 +588,9 @@ fn tint(s: &str) -> colored::ColoredString {
         "false" => s.dimmed(),
         "PENDING" | "UPDATING" | "ADOPTING" | "UNKNOWN" => s.yellow(),
         "current" | "supported" | "ok" => s.green(),
+        "appeared" => s.yellow(),
+        "disappeared" => s.dimmed(),
+        "changed" => s.cyan(),
         "weak" | "medium" => s.yellow(),
         "critical" => s.red().bold(),
         "high" => s.red(),

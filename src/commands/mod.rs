@@ -9,6 +9,7 @@ pub mod audit;
 pub mod blast;
 pub mod clients;
 pub mod devices;
+pub mod diff;
 pub mod footprint;
 pub mod hosts;
 pub mod info;

@@ -145,6 +145,9 @@ pub enum Cmd {
     /// One dated, secret-free record of everything the console holds (local only)
     Snapshot(commands::snapshot::SnapshotArgs),
 
+    /// What changed between two snapshots
+    Diff(commands::diff::DiffArgs),
+
     /// Raw request against the API base, for anything not wrapped yet
     #[command(
         after_help = "PATH is relative to the chosen surface and may contain {site},\n\
@@ -216,6 +219,7 @@ pub async fn run() -> Result<()> {
         Cmd::Live(a) => commands::live::run(&c, &ctx, &a).await,
         Cmd::Audit(a) => commands::audit::run(&c, &ctx, &a).await,
         Cmd::Snapshot(a) => commands::snapshot::run(&c, &ctx, &a).await,
+        Cmd::Diff(a) => commands::diff::run(&ctx, &a).await,
         Cmd::Api(a) => commands::api::run(&c, &ctx, a).await,
     }
 }
