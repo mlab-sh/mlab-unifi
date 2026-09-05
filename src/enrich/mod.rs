@@ -8,8 +8,14 @@
 //!   the console itself serves. Entirely local.
 //! * [`oui`] resolves a vendor from the first three bytes of a MAC, through
 //!   mlab.sh, and only for the addresses nothing local could name.
+//! * [`firmware`] reads the console's own verdict on whether a firmware is
+//!   behind, out of support or refused. Purely local.
+//! * [`advisories`] lists published CVEs naming a model on the site. A reading
+//!   list, never a verdict.
 
+pub mod advisories;
 pub mod fingerprint;
+pub mod firmware;
 pub mod oui;
 
 use std::fs;

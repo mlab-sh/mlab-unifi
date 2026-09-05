@@ -17,7 +17,7 @@ tested so far.
 | --- | --- | --- | --- |
 | Asset inventory | every client and device ever seen, with its first appearance | `rest/user`, integration clients | direct |
 | Fingerprint identity | operating system, vendor, family and model, without querying the machine | `rest/user` joined to `fingerprint_devices` | derived |
-| CVE correlation | vulnerable firmware, versions behind the required minimum | `stat/device` joined to a CVE database | derived |
+| CVE correlation | published advisories naming a model on the site | `stat/device` joined to vuln.mlab.sh | partial, see below |
 | End of life | hardware past support, not adoptable, unsupported | `stat/device` | direct |
 | Inbound exposure | ports reachable from the internet, UPnP, forwards with no logging | `rest/portforward`, `rest/networkconf` | direct |
 | Segmentation audit | VLANs without isolation, mDNS crossing boundaries, routable guests | `rest/networkconf`, firewall zones | direct |
@@ -59,6 +59,23 @@ Apple iOS   Smartphone   confidence 99%
 
 The only step that leaves the network is CVE correlation, and it carries
 firmware versions, never the inventory.
+
+## Why CVE correlation stops at a reading list
+
+Measured against the corpus rather than assumed. Of the Ubiquiti CVEs
+published, the product records pin **exact versions** rather than ranges, and
+several recent entries carry no product metadata at all: the model appears only
+in the prose.
+
+That rules out a version verdict. An installed version that matches no record
+tells you nothing, because the record only ever covered the one version a
+researcher tested. What remains sound is matching on **product identity**, which
+mlab-unifi does, and reporting the result as advisories to read.
+
+The consequence for the tool: an empty result is always worded "no advisory
+names this model", never "not vulnerable". The freshness and support columns,
+which come from the vendor's own verdict, are the part that actually answers
+"am I behind".
 
 ## What is not available
 

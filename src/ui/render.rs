@@ -55,6 +55,21 @@ pub const SITE_COLS: &[Col] = &[
     Col("HOST", &["hostId"]),
 ];
 
+/// Devices once the firmware posture is read. `ADVISORIES` is only filled when
+/// the advisory list was consulted, and the renderer drops empty columns, so it
+/// appears exactly when it means something.
+pub const POSTURE_COLS: &[Col] = &[
+    Col("NAME", &["name"]),
+    Col("MODEL", &["model"]),
+    Col("STATE", &["state"]),
+    Col("FIRMWARE", &["firmwareVersion"]),
+    Col("POSTURE", &["posture"]),
+    Col("SUPPORT", &["support"]),
+    Col("ADVISORIES", &["advisories"]),
+    Col("IP", &["ipAddress"]),
+    Col("MAC", &["macAddress"]),
+];
+
 pub const DEVICE_COLS: &[Col] = &[
     Col("NAME", &["name"]),
     Col("MODEL", &["model"]),
@@ -406,6 +421,10 @@ fn tint(s: &str) -> colored::ColoredString {
         // clients must not read as a wall of errors.
         "false" => s.dimmed(),
         "PENDING" | "UPDATING" | "ADOPTING" | "UNKNOWN" => s.yellow(),
+        "current" | "supported" => s.green(),
+        "unsupported" | "end of life" | "below minimum" => s.red(),
+        "update available" => s.yellow(),
+        "lts branch" | "unknown" => s.dimmed(),
         "" => s.normal(),
         _ => s.normal(),
     }
@@ -478,6 +497,12 @@ fn scalar(v: &Value) -> String {
         Value::String(s) => s.clone(),
         Value::Bool(b) => b.to_string(),
         Value::Number(n) => n.to_string(),
+        // An empty list is an absence, not the two characters "[]", and a list
+        // of scalars reads better as a list than as JSON.
+        Value::Array(a) if a.is_empty() => String::new(),
+        Value::Array(a) if a.iter().all(|i| !i.is_object() && !i.is_array()) => {
+            a.iter().map(scalar).collect::<Vec<_>>().join(", ")
+        }
         other => other.to_string(),
     }
 }
@@ -555,6 +580,17 @@ mod tests {
         assert!(
             has_content(&json!(false)),
             "false is a value, not an absence"
+        );
+    }
+
+    #[test]
+    fn lists_read_as_lists_and_an_empty_one_reads_as_nothing() {
+        assert_eq!(scalar(&json!([])), "", "an empty list is an absence");
+        assert_eq!(scalar(&json!(["CVE-1", "CVE-2"])), "CVE-1, CVE-2");
+        assert_eq!(
+            scalar(&json!([{"a": 1}])),
+            "[{\"a\":1}]",
+            "objects still fall back to JSON"
         );
     }
 
